@@ -1,0 +1,12 @@
+{
+    "name": "vvvlaskin",
+    "scripts": {
+        "build": "npx tsc src/app.ts",
+        "example": "npm run build && node src/app.js example.jsonl",
+        "transactions": "npm run build && node src/app.js transactions.jsonl"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.21",
+        "typescript": "^4.6.2"
+    }
+}
