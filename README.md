@@ -120,4 +120,5 @@ A browser user interface, where one could see all the details from all the trans
     ====================================================================
 
     Myyntejä yhteensä: 40910 €
+    Myytyjen valuuttojen hankintahinta yhteensä: 15600 €
     Verotuksessa ilmoitettava tuotto yhteensä: 22211.6 €

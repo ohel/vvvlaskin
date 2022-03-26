@@ -22,6 +22,9 @@ export class SellTransaction extends BaseTransaction {
     // Which buy transactions does this sell cover and how.
     readonly buy_cost_basis: BuyCostBasis[] = []
 
+    // Total buying cost of sales. Can be also computed from buy_cost_basis.
+    readonly total_buy_cost: number
+
     constructor(json: BasicTransactionInfo, previousTransactions: BaseTransaction[]) {
         super(json)
         const previousBuys = previousTransactions.filter(t =>
@@ -56,6 +59,7 @@ export class SellTransaction extends BaseTransaction {
             if (this.unhandled_amount < Number.EPSILON) break
         }
 
+        this.total_buy_cost = total_cost
         this.true_sell_gain = +(Math.round(+((this.total - total_cost) + "e+2")) + "e-2")
         this.tax_sell_gain = +(Math.round(+(total_tax_gain + "e+2")) + "e-2")
 

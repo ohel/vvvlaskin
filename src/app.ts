@@ -35,4 +35,10 @@ if (args && args.length > 2) {
      currency = args[2]
 }
 
+console.log(`
+
+Kullekin myynnin hankintaosuudelle (myyntitapahtuma voi koostua useasta ostotapahtumasta) on laskettu tuotto/tappio Verohallinnon ohjeistuksen mukaisesti siten, että myyntihinnasta on vähennetty kyseisen osuuden hankintakustannus, kuitenkin vähintään 20% osuuden myyntihinnasta. Lisäksi tuotto on enintään 80% myyntihinnasta (hankintameno-olettama).
+Laskut ja raportti on tehty sovelluksella: https://github.com/ohel/vvvlaskin
+`)
+
 t_manager.printSellTransactions(year, currency)

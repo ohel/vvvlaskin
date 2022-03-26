@@ -49,7 +49,8 @@ export class TransactionManager {
         console.log("")
 
         let gains = 0.0
-        let total = 0.0
+        let total_sold = 0.0
+        let total_buy_cost = 0.0
 
         let index = 1
         for (let t of this.transactions.filter((t) => {
@@ -62,15 +63,17 @@ export class TransactionManager {
             let st = (t as SellTransaction)
             st.printTaxReport()
             gains += st.tax_sell_gain
-            total += st.total
+            total_sold += st.total
+            total_buy_cost += st.total_buy_cost
         }
 
         console.log("====================================================================")
         console.log("")
-        console.log(`Myyntejä yhteensä: ${+(Math.round(+(total + "e+2")) + "e-2")} €`)
-        if (total <= 1000) {
+        console.log(`Myyntejä yhteensä: ${+(Math.round(+(total_sold + "e+2")) + "e-2")} €`)
+        if (total_sold <= 1000) {
             console.log("Myyntejä alle 1000 €, ei tarvitse ilmoittaa veroja.")
         }
+        console.log(`Myytyjen valuuttojen hankintahinta yhteensä: ${+(Math.round(+(total_buy_cost + "e+2")) + "e-2")} €`)
         console.log(`Verotuksessa ilmoitettava ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${+(Math.round(+(gains + "e2")) + "e-2")} €`)
     }
 }
