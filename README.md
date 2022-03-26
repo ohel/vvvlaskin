@@ -10,11 +10,15 @@ Toiminta perustuu Verohallinnon ohjeisiin 3/2022:
 
 Ostokustannus lasketaan mukaan virtuaalivaluuttayksikön hintaan tuottoja laskiessa, jotta yhdestä ostoerästä voi laskea myyntejä useassa erässä.
 
+Huomaa, että tämä sovellus on tehty vain koska Verohallinto ei tarjoa mitään järkeviä työkaluja valmiiksi. Sovelluksen käyttö ei siis ole mitenkään virallisesti tuettu ja tapahtuu omalla vastuulla. Laskut voi kuitenkin tarkistaa itse helposti.
+
 ## Info in English (tietoa englanniksi)
 
 A tool for calculating and creating a tax report from sales of virtual currencies according to Finnish legislation. The functionality is based on the instructions by Finnish Tax Administration as of 3/2022, see links in the Finnish info. See below for info on input file format and run instructions.
 
 The buying costs are included in price per unit of virtual currency when calculating gains, so that a single buy transaction may be sold in multiple transactions.
+
+Please note that this application is made only because the Tax Administration does not offer any reasonable tools. Therefore using this application is not officially endorsed and happens at your own risk. The calculations are easy to check by yourself, however.
 
 ## Input file format (sisäänmenotiedoston formaatti)
 
