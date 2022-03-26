@@ -59,3 +59,65 @@ Implement the couple of features marked TODO.
 
 A browser user interface, where one could see all the details from all the transactions and how the gains are computed, and see some overall statistics about their investments.
 (Selainkäyttöliittymä, josta näkisi tiedot kaikista tapahtumista ja kuinka tuotot on laskettu, sekä jotain kokonaistilastoja sijoituksista.)
+
+## Example output (esimerkkituloste)
+
+`$ npm run example 2020`
+
+    Virtuaalivaluuttamyynnit vuonna 2020
+    ====================================================================
+
+    1.
+    Myynti [Ethereum] 2020-11-18 00:11:00 (pörssi: MegaXchange, viite: ABC)
+
+        Määrä: 0.5 ETH
+        Myyntihinta: 440 € (880 €/ETH)
+
+        Hankinnat, joita myytiin:
+        1. 2018-07-25 13:34:00 (pörssi: MegaXchange, viite: -)
+           Määrä: 0.5 ETH
+           Hankintakustannus: 500 € (1000 €/ETH)
+           Verotuksessa ilmoitettava tappio: -60 €
+
+        Verotuksessa ilmoitettava tappio yhteensä: -60 €
+    --------------------------------------------------------------------
+    2.
+    Myynti [Ethereum] 2020-11-24 10:06:00 (pörssi: MegaXchange, viite: -)
+
+        Määrä: 0.5 ETH
+        Myyntihinta: 490 € (980 €/ETH)
+
+        Hankinnat, joita myytiin:
+        1. 2018-07-25 13:34:00 (pörssi: MegaXchange, viite: -)
+           Määrä: 0.5 ETH
+           Hankintakustannus: 500 € (1000 €/ETH)
+           Verotuksessa ilmoitettava tappio: -10 €
+
+        Verotuksessa ilmoitettava tappio yhteensä: -10 €
+    --------------------------------------------------------------------
+    3.
+    Myynti [Bitcoin] 2020-11-24 10:09:00 (pörssi: MegaXchange, viite: -)
+
+        Määrä: 2.5 BTC
+        Myyntihinta: 39980 € (15992 €/BTC)
+
+        Hankinnat, joita myytiin:
+        1. 2018-07-25 13:40:00 (pörssi: MegaXchange, viite: XYZ)
+           Määrä: 1 BTC
+           Hankintakustannus: 100 € (100 €/BTC)
+           Verotuksessa ilmoitettava tuotto: 12793.6 €
+        2. 2019-04-03 00:55:00 (pörssi: MegaXchange, viite: -)
+           Määrä: 1 BTC
+           Hankintakustannus: 8000 € (8000 €/BTC)
+           Verotuksessa ilmoitettava tuotto: 7992 €
+        3. 2020-11-24 10:07:00 (pörssi: MegaXchange, viite: -)
+           Määrä: 0.5 BTC
+           Hankintakustannus: 6500 € (13000 €/BTC)
+           Verotuksessa ilmoitettava tuotto: 1496 €
+
+        Verotuksessa ilmoitettava tuotto yhteensä: 22281.6 €
+    --------------------------------------------------------------------
+    ====================================================================
+
+    Myyntejä yhteensä: 40910 €
+    Verotuksessa ilmoitettava tuotto yhteensä: 22211.6 €
