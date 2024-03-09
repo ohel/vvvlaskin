@@ -1,11 +1,11 @@
 /*
-   Copyright 2022 Olli Helin
-   This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
-   GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
+    Copyright 2022, 2024 Olli Helin
+    This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
+    GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
-import { TransactionType } from "./transaction-type"
-import { BasicTransactionInfo } from "./basic-transaction-info"
+import { TransactionType } from './transaction-type'
+import { BasicTransactionInfo } from './basic-transaction-info'
 
 export class RawTransaction implements BasicTransactionInfo {
 
@@ -38,10 +38,10 @@ export class RawTransaction implements BasicTransactionInfo {
             }
 
             let trtype_string: string
-            if (json.trtype.match(/[Bb][Uu]?[Yy]?/)) trtype_string = "Buy"
-            if (json.trtype.match(/[Ss][Ee]?[Ll]?[Ll]?/)) trtype_string = "Sell"
-            if (json.trtype.match(/[Tt][Rr]?[Aa]?[Nn]?[Ss]?[Ff]?[Ee]?[Rr]?/)) trtype_string = "Transfer"
-            if (!trtype_string) throw Error("Unknown transaction type.")
+            if (json.trtype.match(/[Bb][Uu]?[Yy]?/)) trtype_string = 'Buy'
+            if (json.trtype.match(/[Ss][Ee]?[Ll]?[Ll]?/)) trtype_string = 'Sell'
+            if (json.trtype.match(/[Tt][Rr]?[Aa]?[Nn]?[Ss]?[Ff]?[Ee]?[Rr]?/)) trtype_string = 'Transfer'
+            if (!trtype_string) throw Error('Unknown transaction type.')
             this.trtype = TransactionType[trtype_string]
 
             this.timestamp = new Date(json.timestamp)
@@ -58,10 +58,10 @@ export class RawTransaction implements BasicTransactionInfo {
 
             if (this.trtype == TransactionType.Transfer && (this.fee > 0 || this.vcfee > 0)) {
                 // TODO
-                console.warn("Transfer costs are not implemented.")
+                console.warn('Transfer costs are not implemented.')
             }
         } catch (err) {
-            console.error("Invalid transaction line:")
+            console.error('Invalid transaction line:')
             console.error(err)
             process.exit(1)
         }

@@ -1,14 +1,14 @@
 /*
-   Copyright 2022 Olli Helin
-   This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
-   GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
+    Copyright 2022, 2024 Olli Helin
+    This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
+    GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
-import { TransactionType } from "./transaction-type"
-import { BaseTransaction } from "./base-transaction"
-import { BasicTransactionInfo } from "./basic-transaction-info"
-import { BuyCostBasis } from "./buy-cost-basis"
-import Currencies from "./currencies"
+import { TransactionType } from './transaction-type'
+import { BaseTransaction } from './base-transaction'
+import { BasicTransactionInfo } from './basic-transaction-info'
+import { BuyCostBasis } from './buy-cost-basis'
+import Currencies from './currencies'
 
 export class SellTransaction extends BaseTransaction {
     readonly trtype: TransactionType = TransactionType.Sell
@@ -60,12 +60,12 @@ export class SellTransaction extends BaseTransaction {
         }
 
         this.total_buy_cost = total_cost
-        this.true_sell_gain = +(Math.round(+((this.total - total_cost) + "e+2")) + "e-2")
-        this.tax_sell_gain = +(Math.round(+(total_tax_gain + "e+2")) + "e-2")
+        this.true_sell_gain = +(Math.round(+((this.total - total_cost) + 'e+2')) + 'e-2')
+        this.tax_sell_gain = +(Math.round(+(total_tax_gain + 'e+2')) + 'e-2')
 
         // Ignore if rounding errors result in less than a cent of error.
         if (this.unhandled_amount > 0 && this.unhandled_amount * this.end_ppu > 0.01) {
-            console.log("Warning: sell transaction covers more than buy transactions. Unhandled amount: " + this.unhandled_amount)
+            console.log('Warning: sell transaction covers more than buy transactions. Unhandled amount: ' + this.unhandled_amount)
         }
     }
 
@@ -75,12 +75,12 @@ export class SellTransaction extends BaseTransaction {
     private calculateTaxGain(sell_total: number, buy_cost: number): number {
         return +(Math.round(+(
             Math.min(sell_total - Math.max(buy_cost, 0.2 * sell_total), 0.8 * sell_total)
-            + "e+2")) + "e-2")
+            + 'e+2')) + 'e-2')
     }
 
     printTaxReport(): void {
         console.log(
-`Myynti [${Currencies[this.cur] || this.cur}] ${this.timestamp.toISOString().slice(0, 19).replace("T", " ")} (pörssi: ${this.exchange || '-'}, viite: ${this.ref || '-'})
+`Myynti [${Currencies[this.cur] || this.cur}] ${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${this.exchange || '-'}, viite: ${this.ref || '-'})
 
     Määrä: ${this.amount} ${this.cur}
     Myyntihinta: ${this.total} € (${this.end_ppu} €/${this.cur})
@@ -89,13 +89,13 @@ export class SellTransaction extends BaseTransaction {
 
         for (let i in this.buy_cost_basis) {
             let buy = this.buy_cost_basis[i].transaction
-            console.log(`    ${+i+1}. ${buy.timestamp.toISOString().slice(0, 19).replace("T", " ")} (pörssi: ${buy.exchange || '-'}, viite: ${buy.ref || '-'})`)
+            console.log(`    ${+i+1}. ${buy.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${buy.exchange || '-'}, viite: ${buy.ref || '-'})`)
             console.log(`       Määrä: ${this.buy_cost_basis[i].amount} ${buy.cur}`)
-            console.log(`       Hankintakustannus: ${+(Math.round(+(buy.end_ppu * this.buy_cost_basis[i].amount + "e+2")) + "e-2")} € (${buy.end_ppu} €/${buy.cur})`)
+            console.log(`       Hankintakustannus: ${+(Math.round(+(buy.end_ppu * this.buy_cost_basis[i].amount + 'e+2')) + 'e-2')} € (${buy.end_ppu} €/${buy.cur})`)
             console.log(`       Verotuksessa ilmoitettava ${this.buy_cost_basis[i].tax_gain >= 0 ? 'tuotto' : 'tappio'}: ${this.buy_cost_basis[i].tax_gain} €`)
         }
         console.log()
         console.log(`    Verotuksessa ilmoitettava ${this.tax_sell_gain >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${this.tax_sell_gain} €`)
-        console.log("--------------------------------------------------------------------")
+        console.log('--------------------------------------------------------------------')
     }
 }

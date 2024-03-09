@@ -12,7 +12,7 @@
 { "timestamp": "2022-0x-yy xx:xx", "trtype": "buy", "cur": "XXX", "amount": 20.0, "ppu": 10.0, "fee": 2.99, "subtotal": 197.01, "total": 200, "exchange": "MegaXchange", "ref": "", "comment": "Template", "ignore": true }
 { "timestamp": "2022-0x-yy xx:xx", "trtype": "sell", "cur": "XXX", "amount": 20.0, "ppu": 20.0, "fee": 4.00, "subtotal": 400, "total": 396, "exchange": "MegaXchange", "ref": "", "comment": "Template", "ignore": true }
 
-{ "timestamp": "2018-07-25 16:40", "trtype": "buy", "cur": "BTC", "amount": 1.5, "ppu": 100, "fee": 0, "subtotal": 150, "total": 150, "exchange": "MegaXchange", "ref": "XYZ", "comment": "Gift." }
+{ "timestamp": "2018-07-25 15:40", "trtype": "buy", "cur": "BTC", "amount": 1.5, "ppu": 100, "fee": 0, "subtotal": 150, "total": 150, "exchange": "MegaXchange", "ref": "XYZ", "comment": "Gift." }
 { "timestamp": "2018-07-25 16:34", "trtype": "buy", "cur": "ETH", "amount": 2.5, "ppu": 1000, "fee": 10, "subtotal": 2490, "total": 2500, "exchange": "MegaXchange", "ref": "" }
 { "timestamp": "2018-07-25 16:35", "trtype": "sell", "cur": "BTC", "amount": 0.5, "ppu": 12000, "fee": 20, "subtotal": 6000, "total": 5980, "exchange": "MegaXchange", "ref": "" }
 { "timestamp": "2019-04-03 03:55", "trtype": "buy", "cur": "BTC", "amount": 1.0, "ppu": 8000, "fee": 20, "subtotal": 7980, "total": 8000, "exchange": "MegaXchange", "ref": "" }

@@ -1,38 +1,36 @@
 // Virtuaalivaluuttaverotuslaskin (vvvlaskin)
 
 /*
-   Copyright 2022 Olli Helin
-   This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
-   GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
+    Copyright 2022, 2024 Olli Helin
+    This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
+    GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
-import { TransactionManager } from "./transaction-manager"
-
-const fs = require('fs')
+import { readFileSync } from 'fs'
+import { TransactionManager } from './transaction-manager'
 
 const args = process.argv.slice(2);
 if (!args || args.length < 1) {
-    console.error("Missing file argument.")
-    process.exit()
+    throw new Error('Missing file argument.')
 }
 
-const raw_data: string = fs.readFileSync(args[0], 'utf8' , (err, data) => {
-    if (err) {
-        console.error(err)
-        process.exit()
-    }
-    return data
-})
-
+const raw_data = readFileSync(args[0], { encoding: 'utf8' })
 const t_manager = new TransactionManager(raw_data)
 
-let year: number
-let currency: string
+let year: number = undefined;
+let currency: string = undefined;
+let totals: boolean = false;
 if (args && args.length > 1) {
-     year = parseInt(args[1])
+    totals = (args[1] == 'totals')
+    if (!totals) year = parseInt(args[1])
 }
 if (args && args.length > 2) {
-     currency = args[2]
+    currency = args[2]
+}
+
+if (totals) {
+    t_manager.printTotals(currency)
+    process.exit(0)
 }
 
 console.log(`

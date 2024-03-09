@@ -52,11 +52,18 @@ See also the `example.jsonl` example file. (Katso myös esimerkkitiedosto `examp
 
 1. `npm install`
 2. `npm run example` to run an example (ajaaksesi esimerkin)
+3. `npm run exampletotals` to run example totals (ajaaksesi esimerkin loppusummista)
 
 To calculate the report for a specific input file, year and currency, use a command like: `npm run build && node src/app.js input.jsonl 2022 BTC`, where *input.jsonl* has the transactions, *2022* is an optional year, and *BTC* an optional crypto currency code. List of currencies is in `src/currencies.ts`.
 (Tulostaaksesi ilmoituksen tietylle tiedostolle, vuodelle ja valuutalle, käytä komentoa kuten edellä englanninkielisessä tekstissä; komennossa *input.jsonl* on tapahtumatiedosto, *2022* on valinnainen vuosi ja *BTC* on valinnainen valuuttakoodi. Lista valuutoista on tiedostossa `src/currencies.ts`.)
 
-## Future plans (jatkosuunnitelmia)
+You may also print totals (total money put in, money got out, current gains and balances) for each currency and grand total with: `node src/app.js input.jsonl totals`.
+(Voit myös tulostaa loppusummat (sisään laitettu raha, ulos saatu raha, voitot ja saldot) jokaiselle valuutalle ja kokonaisuudelle komennolla: `node src/app.js input.jsonl totals`.)
+
+Note: the gains in totals only matters if your balance is zero, i.e. everything bought is sold. Otherwise it's just "gains so far".
+(Huomaa: tuotto loppusummissa on mielekäs vain jos saldo on nolla, eli kaikki ostettu on myyty. Muutoin kyseessä on vain "tuotto tähän asti".)
+
+## Future feature ideas (jatkokehitysajatuksia)
 
 Implement the couple of features marked TODO.
 (Toteuta pari TODO-merkittyä ominaisuutta.)
@@ -126,3 +133,18 @@ A browser user interface, where one could see all the details from all the trans
     Myyntejä yhteensä: 40910 €
     Myytyjen valuuttojen hankintahinta yhteensä: 15600 €
     Verotuksessa ilmoitettava tuotto yhteensä: 22211.6 €
+
+## Example totals output (esimerkkituloste loppusummista)
+
+`$ npm run exampletotals`
+
+    =================================================
+
+    CURRENCY    BUYS      SALES       GAIN    BALANCE
+
+      BTC:     21150      45960      24810        0.5
+      ETH:      4050        930      -3120        4.5
+
+    Total:     25200      46890      21690
+
+    =================================================
