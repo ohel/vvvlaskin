@@ -8,6 +8,7 @@ import { TransactionType } from './transaction-type'
 import { BaseTransaction } from './base-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { BuyCostBasis } from './buy-cost-basis'
+import { roundTwoDecimals, printTwoDecimals } from './utils'
 import Currencies from './currencies'
 
 export class SellTransaction extends BaseTransaction {
@@ -83,7 +84,7 @@ export class SellTransaction extends BaseTransaction {
 `Myynti [${Currencies[this.cur] || this.cur}] ${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${this.exchange || '-'}, viite: ${this.ref || '-'})
 
     Määrä: ${this.amount} ${this.cur}
-    Myyntihinta: ${this.total} € (${this.end_ppu} €/${this.cur})
+    Myyntihinta: ${printTwoDecimals(this.total)} € (${this.end_ppu} €/${this.cur})
 
     Hankinnat, joita myytiin:`)
 
@@ -91,11 +92,12 @@ export class SellTransaction extends BaseTransaction {
             let buy = this.buy_cost_basis[i].transaction
             console.log(`    ${+i+1}. ${buy.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${buy.exchange || '-'}, viite: ${buy.ref || '-'})`)
             console.log(`       Määrä: ${this.buy_cost_basis[i].amount} ${buy.cur}`)
-            console.log(`       Hankintakustannus: ${+(Math.round(+(buy.end_ppu * this.buy_cost_basis[i].amount + 'e+2')) + 'e-2')} € (${buy.end_ppu} €/${buy.cur})`)
-            console.log(`       Verotuksessa ilmoitettava ${this.buy_cost_basis[i].tax_gain >= 0 ? 'tuotto' : 'tappio'}: ${this.buy_cost_basis[i].tax_gain} €`)
+            console.log(`       Hankintakustannus: ${roundTwoDecimals(buy.end_ppu * this.buy_cost_basis[i].amount)} € (${buy.end_ppu} €/${buy.cur})`)
+            console.log(`       Verotuksessa ilmoitettava ${this.buy_cost_basis[i].tax_gain >= 0 ? 'tuotto' : 'tappio'}: ${printTwoDecimals(this.buy_cost_basis[i].tax_gain)} €`)
         }
         console.log()
-        console.log(`    Verotuksessa ilmoitettava ${this.tax_sell_gain >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${this.tax_sell_gain} €`)
+        console.log(`    Verotuksessa ilmoitettava ${this.tax_sell_gain >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${printTwoDecimals(this.tax_sell_gain)} €`)
         console.log('--------------------------------------------------------------------')
     }
+
 }
