@@ -35,7 +35,7 @@ if (totals) {
 
 console.log(`
 
-Kullekin myynnin hankintaosuudelle (myyntitapahtuma voi koostua useasta ostotapahtumasta) on laskettu tuotto/tappio Verohallinnon ohjeistuksen mukaisesti siten, että myyntihinnasta on vähennetty kyseisen osuuden hankintakustannus, kuitenkin vähintään 20% osuuden myyntihinnasta. Lisäksi tuotto on enintään 80% myyntihinnasta (hankintameno-olettama). Tulosteissa desimaalierotin on piste.
+Kullekin myynnin hankintaosuudelle (myyntitapahtuma voi koostua useasta ostotapahtumasta) on laskettu tuotto/tappio Verohallinnon ohjeistuksen mukaisesti siten, että myyntihinnasta on vähennetty kyseisen osuuden hankintakustannus, kuitenkin vähintään 20% osuuden myyntihinnasta. Lisäksi tuotto on enintään 80% myyntihinnasta (hankintameno-olettama). Tästä laskentatavasta johtuen laskuissa voi esiintyä pieniä pyöristysvirheitä verrattuna kokonaismyyntihinnan ja hankintakulujen erotukseen. Tulosteissa desimaalierotin on piste.
 Laskut ja raportti on tehty sovelluksella: https://github.com/ohel/vvvlaskin
 `)
 

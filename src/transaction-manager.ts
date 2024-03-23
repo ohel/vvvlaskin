@@ -11,7 +11,7 @@ import { SellTransaction } from './sell-transaction'
 import { TransferTransaction } from './transfer-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { RawTransaction } from './raw-transaction'
-import { roundTwoDecimals } from './utils'
+import { roundAndPrintTwoDecimals, roundTwoDecimals, printTwoDecimals } from './utils'
 import Currencies from './currencies'
 
 export class TransactionManager {
@@ -71,13 +71,13 @@ export class TransactionManager {
         console.log('=================================================\n')
         console.log('CURRENCY    BUYS      SALES       GAIN    BALANCE\n')
         for (const t of totals) {
-            console.log(`${t.currency.padStart(5)}:${roundTwoDecimals(t.buys, 10)} ${roundTwoDecimals(t.sales, 10)} ` +
-            `${roundTwoDecimals(t.gain, 10)} ${roundTwoDecimals(t.balance, 10)}`)
+            console.log(`${t.currency.padStart(5)}:${roundAndPrintTwoDecimals(t.buys, 10)} ${roundAndPrintTwoDecimals(t.sales, 10)} ` +
+            `${roundAndPrintTwoDecimals(t.gain, 10)} ${roundAndPrintTwoDecimals(t.balance, 10)}`)
         }
         const buys = totals.map(t => t.buys).reduce((x,y) => {return x+y})
         const sales = totals.map(t => t.sales).reduce((x,y) => {return x+y})
         const gain = totals.map(t => t.gain).reduce((x,y) => {return x+y})
-        console.log(`\nTotal:${roundTwoDecimals(buys, 10)} ${roundTwoDecimals(sales, 10)} ${roundTwoDecimals(gain, 10)}`)
+        console.log(`\nTotal:${roundAndPrintTwoDecimals(buys, 10)} ${roundAndPrintTwoDecimals(sales, 10)} ${roundAndPrintTwoDecimals(gain, 10)}`)
         console.log('\n=================================================')
     }
 
@@ -100,16 +100,18 @@ export class TransactionManager {
             const st = (t as SellTransaction)
             st.printTaxReport()
             gains += st.tax_sell_gain
-            total_sold += st.total
-            total_buy_cost += st.total_buy_cost
+            total_sold += roundTwoDecimals(st.total)
+            total_buy_cost += roundTwoDecimals(st.total_buy_cost)
         }
 
         console.log('====================================================================\n')
-        console.log(`Myyntejä yhteensä: ${roundTwoDecimals(total_sold)} €`)
+        console.log(`Myyntejä yhteensä: ${roundAndPrintTwoDecimals(total_sold)} €`)
         if (total_sold <= 1000) {
             console.log('Myyntejä enintään 1000 €, ei tarvitse ilmoittaa veroja.')
         }
-        console.log(`Myytyjen valuuttojen hankintahinta yhteensä: ${roundTwoDecimals(total_buy_cost)} €`)
-        console.log(`Verotuksessa ilmoitettava ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${roundTwoDecimals(gains)} €`)
+        console.log(`Myytyjen valuuttojen hankintahinta yhteensä: ${roundAndPrintTwoDecimals(total_buy_cost)} €`)
+        console.log(`Myyntien ja hankintahinnan erotus: ${roundAndPrintTwoDecimals(total_sold - total_buy_cost)} €`)
+        console.log(`Verotuksessa ilmoitettava ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${printTwoDecimals(gains)} €\n`)
+        console.log(`Huomaa, että ilmoitettava ${gains >= 0 ? 'tuotto' : 'tappio'} on laskettu jokaista transaktiota kohti ja niiden laskemisessa voi esiintyä pyöristysvirheitä, jolloin summa voi erota hieman myyntien ja hankintahinnan erotuksesta.`)
     }
 }

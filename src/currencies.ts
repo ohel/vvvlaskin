@@ -5,11 +5,13 @@
 */
 
 export default {
+    '00'    : '00 Token',
     'AAVE'  : 'Aave',
     'ADA'   : 'Cardano',
     'AMP'   : 'Amp',
     'ANKR'  : 'Ankr',
     'ATOM'  : 'Cosmos',
+    'BOBA'  : 'Boba Network',
     'BTC'   : 'Bitcoin',
     'CGLD'  : 'Celo',
     'DNT'   : 'district0x',

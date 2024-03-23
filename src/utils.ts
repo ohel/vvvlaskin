@@ -14,7 +14,7 @@ const printTwoDecimals = (num: number): string => {
     return retval
 }
 
-const roundTwoDecimals = (num: number, pad_length?: number): string => {
+const roundAndPrintTwoDecimals = (num: number, pad_length?: number): string => {
     let retval: string =
         -0.005 < num && num < 0.005 ? '0.00' :
         (+(Math.round(+(num * 100)) + 'e-2')).toString()
@@ -27,4 +27,8 @@ const roundTwoDecimals = (num: number, pad_length?: number): string => {
     return retval.padStart(pad_length)
 }
 
-export { printTwoDecimals, roundTwoDecimals }
+const roundTwoDecimals = (num: number): number => {
+    return +(Math.round(+(num + 'e+2')) + 'e-2')
+}
+
+export { printTwoDecimals, roundAndPrintTwoDecimals, roundTwoDecimals }
