@@ -66,7 +66,7 @@ export class SellTransaction extends BaseTransaction {
 
         // Ignore if rounding errors result in less than a cent of error.
         if (this.unhandled_amount > 0 && this.unhandled_amount * this.end_ppu > 0.01) {
-            console.log('Warning: sell transaction covers more than buy transactions. Unhandled amount: ' + this.unhandled_amount)
+            console.log('Warning: sell transaction covers more than known buy transactions. Unhandled amount: ' + this.unhandled_amount)
         }
     }
 

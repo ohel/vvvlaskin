@@ -42,7 +42,7 @@ export class TransactionManager {
     }
 
     printTotals(currency?: string) {
-        const currencies = currency ? [ currency ] : Array.from(new Set(this.transactions.map(t => t.cur)))
+        const currenciesToPrint = currency ? [ currency ] : Array.from(new Set(this.transactions.map(t => t.cur)))
 
         const totals: {
             currency: string,
@@ -52,7 +52,7 @@ export class TransactionManager {
             balance: number
         }[] = []
 
-        for (const c of currencies) {
+        for (const c of currenciesToPrint) {
             let buys: number = 0.0
             let sales: number = 0.0
             let balance: number = 0.0
@@ -68,17 +68,21 @@ export class TransactionManager {
             totals.push({currency: c, buys, sales, gain: sales - buys, balance})
         }
 
-        console.log('=================================================\n')
-        console.log('CURRENCY    BUYS      SALES       GAIN    BALANCE\n')
+        const maxCurrencyLength: number = Math.max(...(Object.keys(Currencies).map(c => c.length)));
+        const padWidth: number = Math.max('CURRENCY'.length, maxCurrencyLength);
+        const pad: string = '='.repeat(padWidth);
+
+        console.log(`${pad}============================================\n`)
+        console.log(`${'CURRENCY'.padStart(padWidth)}       BUYS      SALES       GAIN    BALANCE\n`)
         for (const t of totals) {
-            console.log(`${t.currency.padStart(5)}:${roundAndPrintTwoDecimals(t.buys, 10)} ${roundAndPrintTwoDecimals(t.sales, 10)} ` +
+            console.log(`${t.currency.padStart(padWidth)} ${roundAndPrintTwoDecimals(t.buys, 10)} ${roundAndPrintTwoDecimals(t.sales, 10)} ` +
             `${roundAndPrintTwoDecimals(t.gain, 10)} ${roundAndPrintTwoDecimals(t.balance, 10)}`)
         }
         const buys = totals.map(t => t.buys).reduce((x,y) => {return x+y})
         const sales = totals.map(t => t.sales).reduce((x,y) => {return x+y})
         const gain = totals.map(t => t.gain).reduce((x,y) => {return x+y})
         console.log(`\nTotal:${roundAndPrintTwoDecimals(buys, 10)} ${roundAndPrintTwoDecimals(sales, 10)} ${roundAndPrintTwoDecimals(gain, 10)}`)
-        console.log('\n=================================================')
+        console.log(`\n${pad}============================================`)
     }
 
     printSellTransactions(year?: number, currency?: string) {

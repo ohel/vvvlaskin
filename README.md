@@ -12,6 +12,8 @@ Ostokustannus lasketaan mukaan virtuaalivaluuttayksikön hintaan tuottoja laskie
 
 Huomaa, että tämä sovellus on tehty vain koska Verohallinto ei tarjoa mitään järkeviä työkaluja valmiiksi. Sovelluksen käyttö ei siis ole mitenkään virallisesti tuettu ja tapahtuu omalla vastuulla. Laskut voi kuitenkin tarkistaa itse helposti.
 
+Siirtotyyppiset transaktiot ovat tällä hetkellä vain omaksi tiedoksesi, sillä Verohallinto vaatii merkitsemään arvon realisoitumisen aina kun valuuttaa vaihdetaan toiseen, efektiivisesti siis myynti- ja ostotransaktioina.
+
 ## Info in English (tietoa englanniksi)
 
 A tool for calculating and creating a tax report from sales of virtual currencies according to Finnish legislation. The functionality is based on the instructions by Finnish Tax Administration as of 3/2022, see links in the Finnish info. See below for info on input file format and run instructions.
@@ -20,6 +22,8 @@ The buying costs are included in price per unit of virtual currency when calcula
 
 Please note that this application is made only because the Tax Administration does not offer any reasonable tools. Therefore using this application is not officially endorsed and happens at your own risk. The calculations are easy to check by yourself, however.
 
+Transactions of the transfer type are at the moment just notes to yourself as the Tax Administration requires realizing the value every time a currency is exchanged to another, effectively resulting in sell and buy transactions.
+
 ## Input file format (sisäänmenotiedoston formaatti)
 
 * JSONL file (JSONL-tiedosto)
@@ -27,13 +31,13 @@ Please note that this application is made only because the Tax Administration do
 * Mandatory properties (pakolliset arvot): timestamp, trtype, cur, amount, ppu, fee, subtotal, total
   * cur = currency (valuutta)
   * PPU = Price Per Unit of currency (valuuttayksikön hinta)
-  * trtype: `b[uy]|s[ell]|t[ransfer]`
+  * trtype: `b[uy]|s[ell]|t[ransfer]` (osto, myynti, siirto)
   * timestamp: YYYY-MM-DD HH:MM
   * cur: string
   * the rest (kaikki loput): number/float
 * Optional properties (valinnaiset arvot): comment, vcfee, exchange, ref, ignore
   * vcfee = Virtual Currency fee, as opposed to *fee* which is in fiat currency (virtuaalivaluuttakustannus; eri kuin kustannus, joka on fiat-valuutassa)
-  * ref = exchange transaction reference (pörssin viite)
+  * ref = exchange transaction reference or block signature (pörssin viite tai lohkon allekirjoitus)
   * vcfee: number/float
   * ignore: boolean
   * the rest (kaikki loput): string
@@ -65,8 +69,8 @@ Note: the gains in totals only matters if your balance is zero, i.e. everything 
 
 ## Future feature ideas (jatkokehitysajatuksia)
 
-Implement the couple of features marked TODO.
-(Toteuta pari TODO-merkittyä ominaisuutta.)
+Implement the features marked TODO.
+(Toteuta TODO-merkityt ominaisuudet.)
 
 A browser user interface, where one could see all the details from all the transactions and how the gains are computed, and see some overall statistics about their investments.
 (Selainkäyttöliittymä, josta näkisi tiedot kaikista tapahtumista ja kuinka tuotot on laskettu, sekä jotain kokonaistilastoja sijoituksista.)

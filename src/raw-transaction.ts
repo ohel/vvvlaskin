@@ -55,11 +55,6 @@ export class RawTransaction implements BasicTransactionInfo {
             if (json.vcfee) this.vcfee = json.vcfee
             if (json.exchange) this.exchange = json.exchange
             if (json.ref) this.ref = json.ref
-
-            if (this.trtype == TransactionType.Transfer && (this.fee > 0 || this.vcfee > 0)) {
-                // TODO
-                console.warn('Transfer costs are not implemented.')
-            }
         } catch (err) {
             console.error('Invalid transaction line:')
             console.error(err)
