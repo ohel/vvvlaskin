@@ -35,7 +35,7 @@ export class SellTransaction extends BaseTransaction {
         this.tax_sell_gain = 0.0
 
         for (let buy of previousBuys) {
-            if (buy.unhandled_amount == 0) continue
+            if (buy.unhandled_amount < Number.EPSILON) continue
             let amount: number = 0.0
 
             if (buy.unhandled_amount >= this.unhandled_amount) {
