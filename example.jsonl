@@ -1,14 +1,17 @@
-{ "comment": "When reading the file, ignore objects with true ignore property.", "ignore": true }
+{ "comment": "When reading the file, objects with property ignore == true, and empty lines are ignored.", "ignore": true }
 { "comment": "Mandatory properties: timestamp, trtype, cur, amount, ppu, fee, subtotal, total.", "ignore": true }
 { "comment": "    Cur = currency. PPU = Price Per Unit of currency (usually: per coin).", "ignore": true }
-{ "comment": "    Trtype: b[uy]|s[ell]|t[ransfer]. Timestamp: YYYY-MM-DD HH:MM. Cur: string. Rest: floats.", "ignore": true }
+{ "comment": "    Mark PPU, totals and subtotals in your preferred fiat currency. Doesn't matter what it is, just that it is consistent.", "ignore": true }
+{ "comment": "    Trtype: b[uy]|s[ell]|t[ransfer]. Timestamp: YYYY-MM-DD HH:MM[:SS]. Cur: string. Rest: floats.", "ignore": true }
 { "comment": "Optional properties: comment, vcfee, exchange, ref, ignore.", "ignore": true }
-{ "comment": "    Vcfee = Virtual Currency fee (as opposed to *fee* which is in fiat currency). Ref = exchange transaction reference.", "ignore": true }
+{ "comment": "    Vcfee = Virtual Currency fee (as opposed to *fee* which is in fiat currency; vcfee must be of same virtual currency, affecting the same balance/wallet).", "ignore": true }
+{ "comment": "    Ref = exchange transaction reference, or block signature.", "ignore": true }
 { "comment": "    Vcfee: float. Ignore: boolean. Rest: strings.", "ignore": true }
 { "comment": "For buys: <total> = <subtotal> + <fee>", "ignore": true }
 { "comment": "For sales: <total> = <subtotal> - <fee>", "ignore": true }
-{ "comment": "If vcfee exists: <transaction end amount> = <amount> - <vcfee>, and: <end ppu> = <total> / <transaction end amount>.", "ignore": true }
-{ "comment": "For example in Binance, Spot Order fees are in virtual currency and the final amount is not what you ordered. In Buy Crypto the final amount is what you bought and price per unit is correct; fee is deducted from the total amount before calculations as usual.", "ignore": true }
+{ "comment": "If vcfee exists for buys: <transaction end amount> = <amount> - <vcfee>, and: <end ppu> = <total> / <transaction end amount>.", "ignore": true }
+{ "comment": "If vcfee exists for sales: <transaction end amount> = <amount> + <vcfee>, and: <end ppu> = <total> / <transaction end amount>. Note: only mark the vcfee for a sale if it affects the same balance/wallet you are selling from. Otherwise convert it to fiat fee, or mark the fee as its own separate sale (if different virtual currency).", "ignore": true }
+{ "comment": "For example in Binance, Spot Order fees are in virtual currency and the final amount you get is not what you ordered. In Buy Crypto the final amount is what you bought and price per unit is correct; fee is deducted from the total amount before calculations as usual. In this file mark the amounts as your buy or sale order says, making sure to use vcfee to correct the end total.", "ignore": true }
 { "timestamp": "2022-0x-yy xx:xx", "trtype": "buy", "cur": "XXX", "amount": 20.0, "ppu": 10.0, "fee": 2.99, "subtotal": 197.01, "total": 200, "exchange": "MegaXchange", "ref": "", "comment": "Template", "ignore": true }
 { "timestamp": "2022-0x-yy xx:xx", "trtype": "sell", "cur": "XXX", "amount": 20.0, "ppu": 20.0, "fee": 4.00, "subtotal": 400, "total": 396, "exchange": "MegaXchange", "ref": "", "comment": "Template", "ignore": true }
 

@@ -9,6 +9,7 @@ import { BaseTransaction } from './base-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { BuyCostBasis } from './buy-cost-basis'
 import { roundAndPrintTwoDecimals, printTwoDecimals, roundTwoDecimals } from './utils'
+import { HMOType } from './hmo-type'
 import Currencies from './currencies'
 
 export class SellTransaction extends BaseTransaction {
@@ -27,32 +28,45 @@ export class SellTransaction extends BaseTransaction {
     readonly total_buy_cost: number
 
     constructor(json: BasicTransactionInfo, previousTransactions: BaseTransaction[]) {
+
         super(json)
-        const previousBuys = previousTransactions.filter(t =>
+
+        const previousBuyTransactions = previousTransactions.filter(t =>
             t.trtype == TransactionType.Buy && t.cur == this.cur)
 
         this.total_buy_cost = 0.0
         this.tax_sell_gain = 0.0
 
-        for (let buy of previousBuys) {
-            if (buy.unhandled_amount < Number.EPSILON) continue
+        // Not taking into account leap years.
+        const milliseconds_in_ten_years = 10*365*24*60*60*1000
+
+        for (let bt of previousBuyTransactions) {
+            if (bt.unhandled_amount < Number.EPSILON) continue
             let amount: number = 0.0
 
-            if (buy.unhandled_amount >= this.unhandled_amount) {
+            // Check if buy transaction covers this sale fully or only partially.
+            if (bt.unhandled_amount >= this.unhandled_amount) {
                 amount = this.unhandled_amount
-                buy.unhandled_amount -= this.unhandled_amount
+                bt.unhandled_amount -= this.unhandled_amount
                 this.unhandled_amount = 0
             } else {
-                amount = buy.unhandled_amount
-                this.unhandled_amount -= buy.unhandled_amount
-                buy.unhandled_amount = 0
+                amount = bt.unhandled_amount
+                this.unhandled_amount -= bt.unhandled_amount
+                bt.unhandled_amount = 0
             }
-            let cost: number = roundTwoDecimals(amount * buy.end_ppu)
-            let partial_sell_total: number = roundTwoDecimals(amount * this.end_ppu)
+            const cost: number = roundTwoDecimals(amount * bt.end_ppu)
+            const partial_sell_total: number = roundTwoDecimals(amount * this.end_ppu)
+            const hmo_factor: number = (this.timestamp.getTime() - bt.timestamp.getTime() > milliseconds_in_ten_years) ? 0.4 : 0.2
 
-            // Calculate tax for each buy transaction separately.
-            let tax_gain: number = this.calculateTaxGain(partial_sell_total, cost)
-            this.buy_cost_basis.push(new BuyCostBasis(buy, amount, tax_gain))
+            let tax_gain: number = partial_sell_total - cost
+            let hmo_type: HMOType = HMOType.None
+            if (hmo_factor * partial_sell_total > cost) {
+                tax_gain = partial_sell_total * (1 - hmo_factor)
+                hmo_type = hmo_factor > 0.3 ? HMOType.HMO40 : HMOType.HMO20
+            }
+            tax_gain = roundTwoDecimals(tax_gain)
+
+            this.buy_cost_basis.push(new BuyCostBasis(bt, amount, tax_gain, hmo_type))
 
             this.total_buy_cost += cost
             this.tax_sell_gain += tax_gain
@@ -70,18 +84,11 @@ export class SellTransaction extends BaseTransaction {
         }
     }
 
-    // Apply minimum tax requirements + hankintameno-olettama (HMO).
-    // Round result to 2 digits.
-    // TODO: check if buy date is old enough (10+ years) for -40% (0.6) HMO instead of -20% (0.8).
-    private calculateTaxGain(sell_total: number, buy_cost: number): number {
-        return roundTwoDecimals(Math.min(sell_total - Math.max(buy_cost, 0.2 * sell_total), 0.8 * sell_total))
-    }
-
-    printTaxReport(): void {
+    printTaxReturn(): void {
         console.log(
 `Myynti [${Currencies[this.cur] || this.cur}] ${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${this.exchange || '-'}, viite: ${this.ref || '-'})
 
-    Määrä: ${this.amount} ${this.cur}
+    Määrä: ${this.amount} ${this.cur}${this.vcfee > 0 ? ` (+ myyntikulu ${this.vcfee} ${this.cur})` : ''}
     Myyntihinta: ${printTwoDecimals(this.total)} € (${this.end_ppu} €/${this.cur})
 
     Hankinnat, joita myytiin:`)
@@ -91,10 +98,10 @@ export class SellTransaction extends BaseTransaction {
             console.log(`    ${+i+1}. ${buy.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${buy.exchange || '-'}, viite: ${buy.ref || '-'})`)
             console.log(`       Määrä: ${this.buy_cost_basis[i].amount} ${buy.cur}`)
             console.log(`       Hankintakustannus: ${roundAndPrintTwoDecimals(buy.end_ppu * this.buy_cost_basis[i].amount)} € (${buy.end_ppu} €/${buy.cur})`)
-            console.log(`       Verotuksessa ilmoitettava ${this.buy_cost_basis[i].tax_gain >= 0 ? 'tuotto' : 'tappio'}: ${printTwoDecimals(this.buy_cost_basis[i].tax_gain)} €`)
+            console.log(`       ${this.buy_cost_basis[i].tax_gain >= 0 ? 'Tuotto' : 'Tappio'}: ${printTwoDecimals(this.buy_cost_basis[i].tax_gain)} €${this.buy_cost_basis[i].hmo_type.toString()}`)
         }
         console.log()
-        console.log(`    Verotuksessa ilmoitettava ${this.tax_sell_gain >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${printTwoDecimals(this.tax_sell_gain)} €`)
+        console.log(`    ${this.tax_sell_gain >= 0 ? 'Tuotto' : 'Tappio'} yhteensä: ${printTwoDecimals(this.tax_sell_gain)} €`)
         console.log('--------------------------------------------------------------------')
     }
 

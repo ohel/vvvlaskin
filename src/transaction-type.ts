@@ -7,5 +7,6 @@
 export enum TransactionType {
     Buy = 'Buy',
     Sell = 'Sell',
-    Transfer = 'Transfer'
+    Loss = 'Loss', // Just for bookkeeping, used in calculating current balance.
+    Transfer = 'Transfer' // Just for bookkeeping, not used for calculations.
 }

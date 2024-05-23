@@ -8,6 +8,7 @@ import { TransactionType } from './transaction-type'
 import { BaseTransaction } from './base-transaction'
 import { BuyTransaction } from './buy-transaction'
 import { SellTransaction } from './sell-transaction'
+import { LossTransaction } from './loss-transaction'
 import { TransferTransaction } from './transfer-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { RawTransaction } from './raw-transaction'
@@ -36,15 +37,17 @@ export class TransactionManager {
             this.transactions.push(new BuyTransaction(t))
         } else if (t.trtype == TransactionType.Sell) {
             this.transactions.push(new SellTransaction(t, this.transactions))
+        } else if (t.trtype == TransactionType.Loss) {
+            this.transactions.push(new LossTransaction(t))
         } else if (t.trtype == TransactionType.Transfer) {
             this.transactions.push(new TransferTransaction(t))
         }
     }
 
-    printTotals(currency?: string) {
+    printBalances(currency?: string) {
         const currenciesToPrint = currency ? [ currency ] : Array.from(new Set(this.transactions.map(t => t.cur)))
 
-        const totals: {
+        const balances: {
             currency: string,
             buys: number,
             sales: number,
@@ -52,6 +55,7 @@ export class TransactionManager {
             balance: number
         }[] = []
 
+        let maxCurrencyLength: number = 0
         for (const c of currenciesToPrint) {
             let buys: number = 0.0
             let sales: number = 0.0
@@ -59,34 +63,36 @@ export class TransactionManager {
             for (const t of this.transactions.filter(t => { return t.cur.toLowerCase() == c.toLowerCase() })) {
                 if (t.trtype == TransactionType.Buy) {
                     buys += t.total
-                    balance += t.amount
+                    balance += t.unhandled_amount
                 } else if (t.trtype == TransactionType.Sell) {
                     sales += t.total
-                    balance -= t.amount
+                    balance -= t.unhandled_amount
+                } else if (t.trtype == TransactionType.Loss) {
+                    balance = Math.max(0, balance - t.amount)
                 }
             }
-            totals.push({currency: c, buys, sales, gain: sales - buys, balance})
+            balances.push({currency: c, buys, sales, gain: sales - buys, balance})
+            maxCurrencyLength = Math.max(maxCurrencyLength, Currencies[c]?.length)
         }
 
-        const maxCurrencyLength: number = Math.max(...(Object.keys(Currencies).map(c => c.length)));
         const padWidth: number = Math.max('CURRENCY'.length, maxCurrencyLength);
         const pad: string = '='.repeat(padWidth);
 
         console.log(`${pad}============================================\n`)
         console.log(`${'CURRENCY'.padStart(padWidth)}       BUYS      SALES       GAIN    BALANCE\n`)
-        for (const t of totals) {
-            console.log(`${t.currency.padStart(padWidth)} ${roundAndPrintTwoDecimals(t.buys, 10)} ${roundAndPrintTwoDecimals(t.sales, 10)} ` +
+        for (const t of balances) {
+            console.log(`${(Currencies[t.currency] || t.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(t.buys, 10)} ${roundAndPrintTwoDecimals(t.sales, 10)} ` +
             `${roundAndPrintTwoDecimals(t.gain, 10)} ${roundAndPrintTwoDecimals(t.balance, 10)}`)
         }
-        const buys = totals.map(t => t.buys).reduce((x,y) => {return x+y})
-        const sales = totals.map(t => t.sales).reduce((x,y) => {return x+y})
-        const gain = totals.map(t => t.gain).reduce((x,y) => {return x+y})
-        console.log(`\nTotal:${roundAndPrintTwoDecimals(buys, 10)} ${roundAndPrintTwoDecimals(sales, 10)} ${roundAndPrintTwoDecimals(gain, 10)}`)
+        const buys = balances.map(t => t.buys).reduce((x,y) => {return x+y})
+        const sales = balances.map(t => t.sales).reduce((x,y) => {return x+y})
+        const gain = balances.map(t => t.gain).reduce((x,y) => {return x+y})
+        console.log(`\n${'All'.padStart(padWidth)} ${roundAndPrintTwoDecimals(buys, 10)} ${roundAndPrintTwoDecimals(sales, 10)} ${roundAndPrintTwoDecimals(gain, 10)}`)
         console.log(`\n${pad}============================================`)
     }
 
     printSellTransactions(year?: number, currency?: string) {
-        console.log(`${currency ? ((Currencies[currency] || currency) + '-myynnit') : 'Virtuaalivaluuttamyynnit'}${year ? (' vuonna ' + year.toString()) : ''}`)
+        console.log(`${currency ? ((Currencies[currency] || currency) + ' myynnit') : 'Virtuaalivaluuttamyynnit'}${year ? (' vuonna ' + year.toString()) : ''}`)
         console.log('====================================================================\n')
 
         let gains: number = 0.0
@@ -102,7 +108,7 @@ export class TransactionManager {
             console.log(index + '.')
             index++
             const st = (t as SellTransaction)
-            st.printTaxReport()
+            st.printTaxReturn()
             gains += st.tax_sell_gain
             total_sold += roundTwoDecimals(st.total)
             total_buy_cost += roundTwoDecimals(st.total_buy_cost)
@@ -115,7 +121,29 @@ export class TransactionManager {
         }
         console.log(`Myytyjen valuuttojen hankintahinta yhteensä: ${roundAndPrintTwoDecimals(total_buy_cost)} €`)
         console.log(`Myyntien ja hankintahinnan erotus: ${roundAndPrintTwoDecimals(total_sold - total_buy_cost)} €`)
-        console.log(`Verotuksessa ilmoitettava ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${printTwoDecimals(gains)} €\n`)
-        console.log(`Huomaa, että ilmoitettava ${gains >= 0 ? 'tuotto' : 'tappio'} on laskettu jokaista transaktiota kohti ja niiden laskemisessa voi esiintyä pyöristysvirheitä, jolloin summa voi erota hieman myyntien ja hankintahinnan erotuksesta.`)
+        console.log(`Verotuksellinen ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${printTwoDecimals(gains)} €\n`)
+    }
+
+    printLosses(year?: number) {
+        let total_losses: number = 0.0
+
+        let index: number = 0
+        for (const t of this.transactions.filter(t => {
+                return t.trtype == TransactionType.Loss &&
+                (!year || t.timestamp.getFullYear() == year)
+            })) {
+            index++
+            if (index === 1) {
+                console.log('Muut tappiot (huomioi nämä käsin jos tarpeellista)\n====================================================================\n')
+            }
+            console.log(index + '.')
+            t.printBasicInfo()
+            total_losses += t.total
+        }
+
+        if (index > 0) {
+            console.log('====================================================================\n')
+            console.log(`Muut tappiot yhteensä: ${roundAndPrintTwoDecimals(total_losses)} €`)
+        }
     }
 }

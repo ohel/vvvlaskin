@@ -1,6 +1,6 @@
 # Virtuaalivaluuttaverotuslaskin (vvvlaskin)
 
-## Tietoa suomeksi (Finnish info)
+## Tietoa suomeksi (info in Finnish)
 
 Työkalu virtuaalivaluuttojen myynneistä ilmoitettavien verojen laskemiseen. Katso alta sisäänmenotiedoston formaatti ja ajo-ohjeet.
 
@@ -12,9 +12,9 @@ Ostokustannus lasketaan mukaan virtuaalivaluuttayksikön hintaan tuottoja laskie
 
 Huomaa, että tämä sovellus on tehty vain koska Verohallinto ei tarjoa mitään järkeviä työkaluja valmiiksi. Sovelluksen käyttö ei siis ole mitenkään virallisesti tuettu ja tapahtuu omalla vastuulla. Laskut voi kuitenkin tarkistaa itse helposti.
 
-Siirtotyyppiset transaktiot ovat tällä hetkellä vain omaksi tiedoksesi, sillä Verohallinto vaatii merkitsemään arvon realisoitumisen aina kun valuuttaa vaihdetaan toiseen, efektiivisesti siis myynti- ja ostotransaktioina.
+Siirtotyyppiset transaktiot ovat tällä hetkellä vain omaksi tiedoksesi, sillä Verohallinto vaatii merkitsemään arvon realisoitumisen aina kun valuuttaa vaihdetaan toiseen, efektiivisesti siirrot tulee siis kirjata myös myynti- ja ostotransaktioina.
 
-## Info in English (tietoa englanniksi)
+## Info in English
 
 A tool for calculating and creating a tax report from sales of virtual currencies according to Finnish legislation. The functionality is based on the instructions by Finnish Tax Administration as of 3/2022, see links in the Finnish info. See below for info on input file format and run instructions.
 
@@ -24,131 +24,143 @@ Please note that this application is made only because the Tax Administration do
 
 Transactions of the transfer type are at the moment just notes to yourself as the Tax Administration requires realizing the value every time a currency is exchanged to another, effectively resulting in sell and buy transactions.
 
-## Input file format (sisäänmenotiedoston formaatti)
+## Input file format
 
-* JSONL file (JSONL-tiedosto)
-* One transaction per line (tapahtuma per rivi)
-* Mandatory properties (pakolliset arvot): timestamp, trtype, cur, amount, ppu, fee, subtotal, total
-  * cur = currency (valuutta)
-  * PPU = Price Per Unit of currency (valuuttayksikön hinta)
-  * trtype: `b[uy]|s[ell]|t[ransfer]` (osto, myynti, siirto)
-  * timestamp: YYYY-MM-DD HH:MM
+* JSONL file
+* One transaction per line
+* Mandatory properties: timestamp, trtype, cur, amount, ppu, fee, subtotal, total
+  * cur = currency
+  * PPU = Price Per Unit of currency
+  * trtype: `b[uy]|s[ell]|t[ransfer]|l[oss]`
+  * timestamp: YYYY-MM-DD HH:MM:[SS]
   * cur: string
-  * the rest (kaikki loput): number/float
-* Optional properties (valinnaiset arvot): comment, vcfee, exchange, ref, ignore
-  * vcfee = Virtual Currency fee, as opposed to *fee* which is in fiat currency (virtuaalivaluuttakustannus; eri kuin kustannus, joka on fiat-valuutassa)
-  * ref = exchange transaction reference or block signature (pörssin viite tai lohkon allekirjoitus)
+  * the rest: number/float
+  * for loss and transfer transactions the following are not mandatory (or used in any way): ppu, fee, subtotal, total
+* Optional properties: comment, vcfee, exchange, ref, ignore
+  * vcfee = Virtual Currency fee, as opposed to *fee* which is in fiat currency
+  * ref = exchange transaction reference or block signature
   * vcfee: number/float
   * ignore: boolean
-  * the rest (kaikki loput): string
+  * the rest: string
 
-Some calculation rules (laskentasääntöjä):
-* For buys (ostoille): `<total> = <subtotal> + <fee>`
-* For sales (myynneille): `<total> = <subtotal> - <fee>`
-* If vcfee exists (jos vcfee on olemassa): `<transaction final amount> = <amount> - <vcfee>`, and (ja) `<final ppu> = <total> / <transaction final amount>`
+Some calculation rules:
+* For buys: `<total> = <subtotal> + <fee>` and `<transaction final amount> = <amount> - <vcfee>` (make sure the numbers match what you received)
+* For sales: `<total> = <subtotal> - <fee>` and `<transaction final amount> = <amount> + <vcfee>` (make sure the numbers match what you lost)
+* Final price per unit used in calculations is: `<final ppu> = <total> / <transaction final amount>`
+* Transfer transactions are just for bookkeeping, they are not included in the calculations.
+* Loss transactions are used to just fix your balances correct (for example, a transfer fee in virtual currency if there isn't a sale transaction to mark the fee). Balance by loss cannot go negative, so use a big number to zero out your balance.
 
-An example line (esimerkkirivi):
+An example line:
 `{ "timestamp": "2022-0x-yy xx:xx", "trtype": "buy", "cur": "XXX", "amount": 20.0, "ppu": 10.0, "fee": 2.99, "subtotal": 197.01, "total": 200, "exchange": "MegaXchange", "ref": "XYZ123", "comment": "Template", "ignore": true }`
 
-See also the `example.jsonl` example file. (Katso myös esimerkkitiedosto `example.jsonl`.)
+See also the `example.jsonl` example file.
 
-## How to run (kuinka ajaa)
+## How to run
 
 1. `npm install`
-2. `npm run example` to run an example (ajaaksesi esimerkin)
-3. `npm run exampletotals` to run example totals (ajaaksesi esimerkin loppusummista)
+2. `npm run example` to run an example
+3. `npm run examplebalances` to show example balances
 
 To calculate the report for a specific input file, year and currency, use a command like: `npm run build && node src/app.js input.jsonl 2022 BTC`, where *input.jsonl* has the transactions, *2022* is an optional year, and *BTC* an optional crypto currency code. List of currencies is in `src/currencies.ts`.
-(Tulostaaksesi ilmoituksen tietylle tiedostolle, vuodelle ja valuutalle, käytä komentoa kuten edellä englanninkielisessä tekstissä; komennossa *input.jsonl* on tapahtumatiedosto, *2022* on valinnainen vuosi ja *BTC* on valinnainen valuuttakoodi. Lista valuutoista on tiedostossa `src/currencies.ts`.)
 
-You may also print totals (total money put in, money got out, current gains and balances) for each currency and grand total with: `node src/app.js input.jsonl totals`.
-(Voit myös tulostaa loppusummat (sisään laitettu raha, ulos saatu raha, voitot ja saldot) jokaiselle valuutalle ja kokonaisuudelle komennolla: `node src/app.js input.jsonl totals`.)
+You may also print balances (total money put in, money got out, current gains and balances) for each currency and all combined with: `node src/app.js input.jsonl balances`.
 
-Note: the gains in totals only matters if your balance is zero, i.e. everything bought is sold. Otherwise it's just "gains so far".
-(Huomaa: tuotto loppusummissa on mielekäs vain jos saldo on nolla, eli kaikki ostettu on myyty. Muutoin kyseessä on vain "tuotto tähän asti".)
+Note: the gains in balances only matters if your balance is zero, i.e. everything bought is sold. Otherwise it's just "gains so far".
 
-## Future feature ideas (jatkokehitysajatuksia)
+## Kuinka ajaa (how to run in Finnish)
 
-Implement the features marked TODO.
-(Toteuta TODO-merkityt ominaisuudet.)
+1. `npm install`
+2. `npm run example` ajaaksesi esimerkin
+3. `npm run examplebalances` ajaaksesi esimerkin loppusummista
+
+Tulostaaksesi ilmoituksen tietylle tiedostolle, vuodelle ja valuutalle, käytä komentoa kuten edellä englanninkielisessä tekstissä; komennossa *input.jsonl* on tapahtumatiedosto, *2022* on valinnainen vuosi ja *BTC* on valinnainen valuuttakoodi. Lista valuutoista on tiedostossa `src/currencies.ts`.
+
+Voit myös tulostaa loppusummat (sisään laitettu raha, ulos saatu raha, voitot ja saldot) jokaiselle valuutalle ja kokonaisuudelle komennolla: `node src/app.js input.jsonl balances`.
+
+Huomaa: tuotto loppusummissa on mielekäs vain jos saldo on nolla, eli kaikki ostettu on myyty. Muutoin kyseessä on vain "tuotto tähän asti".
+
+## Future feature ideas
 
 A browser user interface, where one could see all the details from all the transactions and how the gains are computed, and see some overall statistics about their investments.
-(Selainkäyttöliittymä, josta näkisi tiedot kaikista tapahtumista ja kuinka tuotot on laskettu, sekä jotain kokonaistilastoja sijoituksista.)
 
-## Example output (esimerkkituloste)
+## Esimerkkituloste / Example output (in Finnish)
 
 `$ npm run example 2020`
+
+    Kullekin myynnin hankintaosuudelle (myyntitapahtuma voi koostua useasta ostotapahtumasta) on laskettu tuotto/tappio Verohallinnon ohjeistuksen mukaisesti siten, että myyntihinnasta on vähennetty kyseisen osuuden hankintakustannus, kuitenkin vähintään 20% osuuden myyntihinnasta: hankintameno-olettamalla tuotto on enintään 80% myyntihinnasta. Tästä laskentatavasta johtuen laskuissa voi esiintyä pieniä pyöristysvirheitä tai eroja verrattuna kokonaismyyntihinnan ja hankintakulujen erotukseen. Tulosteissa desimaalierotin on piste. Laskut ja raportti on tehty sovelluksella: https://github.com/ohel/vvvlaskin
 
     Virtuaalivaluuttamyynnit vuonna 2020
     ====================================================================
 
     1.
-    Myynti [Ethereum] 2020-11-18 00:11:00 (pörssi: MegaXchange, viite: ABC)
+    Myynti [Ether] 2020-11-18 00:11:00 (pörssi: MegaXchange, viite: ABC)
 
         Määrä: 0.5 ETH
-        Myyntihinta: 440 € (880 €/ETH)
+        Myyntihinta: 440.00 € (880 €/ETH)
 
         Hankinnat, joita myytiin:
         1. 2018-07-25 13:34:00 (pörssi: MegaXchange, viite: -)
            Määrä: 0.5 ETH
-           Hankintakustannus: 500 € (1000 €/ETH)
-           Verotuksessa ilmoitettava tappio: -60 €
+           Hankintakustannus: 500.00 € (1000 €/ETH)
+           Tappio: -60.00 €
 
-        Verotuksessa ilmoitettava tappio yhteensä: -60 €
+        Tappio yhteensä: -60.00 €
     --------------------------------------------------------------------
     2.
-    Myynti [Ethereum] 2020-11-24 10:06:00 (pörssi: MegaXchange, viite: -)
+    Myynti [Ether] 2020-11-24 10:06:00 (pörssi: MegaXchange, viite: -)
 
         Määrä: 0.5 ETH
-        Myyntihinta: 490 € (980 €/ETH)
+        Myyntihinta: 490.00 € (980 €/ETH)
 
         Hankinnat, joita myytiin:
         1. 2018-07-25 13:34:00 (pörssi: MegaXchange, viite: -)
            Määrä: 0.5 ETH
-           Hankintakustannus: 500 € (1000 €/ETH)
-           Verotuksessa ilmoitettava tappio: -10 €
+           Hankintakustannus: 500.00 € (1000 €/ETH)
+           Tappio: -10.00 €
 
-        Verotuksessa ilmoitettava tappio yhteensä: -10 €
+        Tappio yhteensä: -10.00 €
     --------------------------------------------------------------------
     3.
     Myynti [Bitcoin] 2020-11-24 10:09:00 (pörssi: MegaXchange, viite: -)
 
         Määrä: 2.5 BTC
-        Myyntihinta: 39980 € (15992 €/BTC)
+        Myyntihinta: 39980.00 € (15992 €/BTC)
 
         Hankinnat, joita myytiin:
-        1. 2018-07-25 13:40:00 (pörssi: MegaXchange, viite: XYZ)
+        1. 2018-07-25 12:40:00 (pörssi: MegaXchange, viite: XYZ)
            Määrä: 1 BTC
-           Hankintakustannus: 100 € (100 €/BTC)
-           Verotuksessa ilmoitettava tuotto: 12793.6 €
+           Hankintakustannus: 100.00 € (100 €/BTC)
+           Tuotto: 12793.60 € (20% HMO)
         2. 2019-04-03 00:55:00 (pörssi: MegaXchange, viite: -)
            Määrä: 1 BTC
-           Hankintakustannus: 8000 € (8000 €/BTC)
-           Verotuksessa ilmoitettava tuotto: 7992 €
+           Hankintakustannus: 8000.00 € (8000 €/BTC)
+           Tuotto: 7992.00 €
         3. 2020-11-24 10:07:00 (pörssi: MegaXchange, viite: -)
            Määrä: 0.5 BTC
-           Hankintakustannus: 6500 € (13000 €/BTC)
-           Verotuksessa ilmoitettava tuotto: 1496 €
+           Hankintakustannus: 6500.00 € (13000 €/BTC)
+           Tuotto: 1496.00 €
 
-        Verotuksessa ilmoitettava tuotto yhteensä: 22281.6 €
+        Tuotto yhteensä: 22281.60 €
     --------------------------------------------------------------------
     ====================================================================
 
-    Myyntejä yhteensä: 40910 €
-    Myytyjen valuuttojen hankintahinta yhteensä: 15600 €
-    Verotuksessa ilmoitettava tuotto yhteensä: 22211.6 €
+    Myyntejä yhteensä: 40910.00 €
+    Myytyjen valuuttojen hankintahinta yhteensä: 15600.00 €
+    Myyntien ja hankintahinnan erotus: 25310.00 €
+    Verotuksellinen tuotto yhteensä: 22211.60 €
 
-## Example totals output (esimerkkituloste loppusummista)
+## Example balances output
 
-`$ npm run exampletotals`
+`$ npm run examplebalances`
 
-    =================================================
+    ====================================================
 
-    CURRENCY    BUYS      SALES       GAIN    BALANCE
+    CURRENCY       BUYS      SALES       GAIN    BALANCE
 
-      BTC:     21150      45960      24810        0.5
-      ETH:      4050        930      -3120        4.5
+     Bitcoin   21150.00   45960.00   24810.00       0.50
+    Ethereum    4050.00     930.00   -3120.00       4.50
 
-    Total:     25200      46890      21690
+         All   25200.00   46890.00   21690.00
 
-    =================================================
+    ====================================================
+

@@ -38,18 +38,22 @@ export class RawTransaction implements BasicTransactionInfo {
             }
 
             let trtype_string: string
-            if (json.trtype.match(/[Bb][Uu]?[Yy]?/)) trtype_string = 'Buy'
-            if (json.trtype.match(/[Ss][Ee]?[Ll]?[Ll]?/)) trtype_string = 'Sell'
-            if (json.trtype.match(/[Tt][Rr]?[Aa]?[Nn]?[Ss]?[Ff]?[Ee]?[Rr]?/)) trtype_string = 'Transfer'
+            if (json.trtype.match(/^[Bb][Uu]?[Yy]?/)) trtype_string = 'Buy'
+            if (json.trtype.match(/^[Ss][Ee]?[Ll]?[Ll]?/)) trtype_string = 'Sell'
+            if (json.trtype.match(/^[Ll][Oo]?[Ss]?[Ss]?/)) trtype_string = 'Loss'
+            if (json.trtype.match(/^[Tt][Rr]?[Aa]?[Nn]?[Ss]?[Ff]?[Ee]?[Rr]?/)) trtype_string = 'Transfer'
             if (!trtype_string) throw Error('Unknown transaction type.')
             this.trtype = TransactionType[trtype_string]
+
+            // For bookkeeping transactions some normally mandatory properties are not required.
+            const bookkeeping = [TransactionType.Loss, TransactionType.Transfer].includes(this.trtype)
 
             this.timestamp = new Date(json.timestamp)
             this.cur = json.cur
             this.amount = json.amount
-            this.ppu = json.ppu
-            this.fee = json.fee
-            this.subtotal = json.subtotal
+            this.ppu = bookkeeping ? 0 : json.ppu
+            this.fee = bookkeeping ? 0 : json.fee
+            this.subtotal = bookkeeping ? 0 : json.subtotal
             this.total = json.total
             if (json.comment) this.comment = json.comment
             if (json.vcfee) this.vcfee = json.vcfee

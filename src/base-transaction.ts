@@ -6,6 +6,8 @@
 
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { TransactionType } from './transaction-type'
+import { printTwoDecimals } from './utils'
+import Currencies from './currencies'
 
 export abstract class BaseTransaction implements BasicTransactionInfo {
 
@@ -19,7 +21,7 @@ export abstract class BaseTransaction implements BasicTransactionInfo {
     readonly total: number
 
     readonly comment?: string
-    readonly vcfee?: number
+    readonly vcfee: number // Note: will always exist if only as 0.
     readonly exchange?: string
     readonly ref?: string
 
@@ -35,12 +37,23 @@ export abstract class BaseTransaction implements BasicTransactionInfo {
         this.fee = json.fee
         this.subtotal = json.subtotal
         this.total = json.total
+        this.vcfee = json.vcfee || 0
         if (json.comment) this.comment = json.comment
-        if (json.vcfee) this.vcfee = json.vcfee
         if (json.exchange) this.exchange = json.exchange
         if (json.ref) this.ref = json.ref
 
-        this.unhandled_amount = (this.vcfee ? (this.amount - this.vcfee) : this.amount)
+        let factor = 0
+        if (json.trtype == TransactionType.Buy) factor = -1 // For buys, fee is subtracted to get the end amount.
+        if (json.trtype == TransactionType.Sell) factor = 1 // For sales, fee is added to get the end amount.
+        this.unhandled_amount = this.amount + factor * this.vcfee
         this.end_ppu = this.total / this.unhandled_amount
+    }
+
+    printBasicInfo(): void {
+        console.log(
+`${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} ${Currencies[this.cur] || this.cur}
+    Määrä: ${this.amount} ${this.cur}
+    Arvo: ${printTwoDecimals(this.total)} €
+`)
     }
 }
