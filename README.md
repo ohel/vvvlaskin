@@ -158,7 +158,7 @@ A browser user interface, where one could see all the details from all the trans
     CURRENCY       BUYS      SALES       GAIN    BALANCE
 
      Bitcoin   21150.00   45960.00   24810.00       0.50
-    Ethereum    4050.00     930.00   -3120.00       4.50
+       Ether    4050.00     930.00   -3120.00       4.50
 
          All   25200.00   46890.00   21690.00
 
