@@ -28,20 +28,18 @@ Transactions of the transfer type are at the moment just notes to yourself as th
 
 * JSONL file
 * One transaction per line
-* Mandatory properties: timestamp, trtype, cur, amount, ppu, fee, subtotal, total
-  * cur = currency
-  * PPU = Price Per Unit of currency
-  * trtype: `b[uy]|s[ell]|t[ransfer]|l[oss]`
+* Mandatory properties: timestamp, trtype, cur, amount, total
   * timestamp: YYYY-MM-DD HH:MM:[SS]
-  * cur: string
-  * the rest: number/float
-  * for loss and transfer transactions the following are not mandatory (or used in any way): ppu, fee, subtotal, total
-* Optional properties: comment, vcfee, exchange, ref, ignore
+  * trtype: `b[uy]|s[ell]|t[ransfer]|l[oss]`
+  * cur = currency: string
+  * amount: number/float
+* Optional properties: fee, ppu, subtotal, comment, vcfee, exchange, ref, ignore
+  * PPU = Price Per Unit of currency
   * vcfee = Virtual Currency fee, as opposed to *fee* which is in fiat currency
   * ref = exchange transaction reference or block signature
-  * vcfee: number/float
-  * ignore: boolean
-  * the rest: string
+  * ignore = ignores the line from calculations: boolean
+  * comment, exchange, ref: string
+  * the rest: number/float
 
 Some calculation rules:
 * For buys: `<total> = <subtotal> + <fee>` and `<transaction final amount> = <amount> - <vcfee>` (make sure the numbers match what you received)

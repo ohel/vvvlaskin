@@ -13,12 +13,12 @@ export interface BasicTransactionInfo {
     readonly cur: string // The virtual currency.
     readonly amount: number // Amount of virtual currency bought or sold.
     readonly ppu: number // Nominal PPU = price per unit of currency (usually per coin).
-    readonly fee: number // Fee in fiat currency.
+    readonly total: number // The total fiat currency price. For sales should be: <total> = <subtotal> - <fee>. For buys should be: <total> = <subtotal> + <fee>.
     readonly subtotal: number // Fiat currency price without fees.
-    readonly total: number // The total fiat currency price. For sales: <total> = <subtotal> - <fee>. For buys: <total> = <subtotal> + <fee>.
+    readonly fee: number // Fee in fiat currency.
+    readonly vcfee: number // Fee in virtual currency. For buys: <end ppu> = <total> / (<amount> - <vcfee>). For sales: <end ppu> = <total> / (<amount> + <vcfee>). Note: only mark the vcfee for a sale if it affects the same balance/wallet you are selling from. Otherwise convert it to fiat fee, or mark the fee as its own separate sale (if different virtual currency).
 
     readonly comment?: string
-    readonly vcfee?: number // Fee in virtual currency. For buys: <end ppu> = <total> / (<amount> - <vcfee>). For sales: <end ppu> = <total> / (<amount> + <vcfee>). Note: only mark the vcfee for a sale if it affects the same balance/wallet you are selling from. Otherwise convert it to fiat fee, or mark the fee as its own separate sale (if different virtual currency).
     readonly exchange?: string // Exchange name.
     readonly ref?: string // Transaction reference.
 

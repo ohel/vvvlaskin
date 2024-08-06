@@ -13,13 +13,13 @@ export class RawTransaction implements BasicTransactionInfo {
     readonly timestamp: Date
     readonly cur: string
     readonly amount: number
+    readonly total: number
     readonly ppu: number
     readonly fee: number
     readonly subtotal: number
-    readonly total: number
+    readonly vcfee: number
 
     readonly comment?: string
-    readonly vcfee?: number
     readonly exchange?: string
     readonly ref?: string
 
@@ -45,22 +45,36 @@ export class RawTransaction implements BasicTransactionInfo {
             if (!trtype_string) throw Error('Unknown transaction type.')
             this.trtype = TransactionType[trtype_string]
 
-            // For bookkeeping transactions some normally mandatory properties are not required.
-            const bookkeeping = [TransactionType.Loss, TransactionType.Transfer].includes(this.trtype)
-
             this.timestamp = new Date(json.timestamp)
-            this.cur = json.cur
-            this.amount = json.amount
-            this.ppu = bookkeeping ? 0 : json.ppu
-            this.fee = bookkeeping ? 0 : json.fee
-            this.subtotal = bookkeeping ? 0 : json.subtotal
-            this.total = json.total
-            if (json.comment) this.comment = json.comment
-            if (json.vcfee) this.vcfee = json.vcfee
-            if (json.exchange) this.exchange = json.exchange
-            if (json.ref) this.ref = json.ref
+            this.cur = json.cur // Mandatory.
+            this.amount = json.amount // Mandatory.
+            this.total = json.total // Mandatory.
+            this.subtotal = json.subtotal // Optional.
+            this.ppu = json.ppu || 0
+            this.fee = json.fee || 0
+            this.vcfee = json.vcfee || 0
+            this.comment = json.comment // Optional.
+            this.exchange = json.exchange // Optional.
+            this.ref = json.ref // Optional.
+
+            if (this.trtype == TransactionType.Buy) {
+                if (!this.subtotal) this.subtotal = this.total - this.fee
+
+                if ((this.total < this.subtotal + this.fee - Number.EPSILON) ||
+                    (this.total > this.subtotal + this.fee + Number.EPSILON))
+                    throw Error('Total, subtotal and fee do not match.')
+            }
+
+            if (this.trtype == TransactionType.Sell) {
+                if (!this.subtotal) this.subtotal = this.total + this.fee
+
+                if ((this.total < this.subtotal - this.fee - Number.EPSILON) ||
+                    (this.total > this.subtotal - this.fee + Number.EPSILON))
+                    throw Error('Total, subtotal and fee do not match.')
+            }
+
         } catch (err) {
-            console.error('Invalid transaction line:')
+            console.error('Invalid transaction line: ' + jsonl)
             console.error(err)
             process.exit(1)
         }

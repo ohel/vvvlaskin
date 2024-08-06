@@ -19,9 +19,9 @@ export abstract class BaseTransaction implements BasicTransactionInfo {
     readonly fee: number
     readonly subtotal: number
     readonly total: number
+    readonly vcfee: number
 
     readonly comment?: string
-    readonly vcfee: number // Note: will always exist if only as 0.
     readonly exchange?: string
     readonly ref?: string
 
@@ -33,11 +33,10 @@ export abstract class BaseTransaction implements BasicTransactionInfo {
         this.timestamp = json.timestamp
         this.cur = json.cur
         this.amount = json.amount
-        this.ppu = json.ppu
         this.fee = json.fee
-        this.subtotal = json.subtotal
         this.total = json.total
-        this.vcfee = json.vcfee || 0
+        this.subtotal = json.subtotal
+        this.vcfee = json.vcfee
         if (json.comment) this.comment = json.comment
         if (json.exchange) this.exchange = json.exchange
         if (json.ref) this.ref = json.ref
@@ -47,6 +46,7 @@ export abstract class BaseTransaction implements BasicTransactionInfo {
         if (json.trtype == TransactionType.Sell) factor = 1 // For sales, fee is added to get the end amount.
         this.unhandled_amount = this.amount + factor * this.vcfee
         this.end_ppu = this.total / this.unhandled_amount
+        this.ppu = json.ppu || this.end_ppu
     }
 
     printBasicInfo(): void {
