@@ -72,7 +72,7 @@ export class TransactionManager {
                 }
             }
             balances.push({currency: c, buys, sales, gain: sales - buys, balance})
-            maxCurrencyLength = Math.max(maxCurrencyLength, Currencies[c]?.length)
+            maxCurrencyLength = Math.max(maxCurrencyLength, Currencies[c]?.length ?? 0)
         }
 
         const padWidth: number = Math.max('CURRENCY'.length, maxCurrencyLength);

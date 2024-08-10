@@ -25,6 +25,8 @@ export class RawTransaction implements BasicTransactionInfo {
 
     readonly ignore: boolean
 
+    private readonly TOTAL_CHECK_ACCURACY: number = 0.999999
+
     constructor(jsonl: string) {
         try {
             this.ignore = !jsonl
@@ -60,16 +62,16 @@ export class RawTransaction implements BasicTransactionInfo {
             if (this.trtype == TransactionType.Buy) {
                 if (!this.subtotal) this.subtotal = this.total - this.fee
 
-                if ((this.total < this.subtotal + this.fee - Number.EPSILON) ||
-                    (this.total > this.subtotal + this.fee + Number.EPSILON))
+                if ((this.total * (2-this.TOTAL_CHECK_ACCURACY) < this.subtotal + this.fee) ||
+                    (this.total * this.TOTAL_CHECK_ACCURACY > this.subtotal + this.fee))
                     throw Error('Total, subtotal and fee do not match.')
             }
 
             if (this.trtype == TransactionType.Sell) {
                 if (!this.subtotal) this.subtotal = this.total + this.fee
 
-                if ((this.total < this.subtotal - this.fee - Number.EPSILON) ||
-                    (this.total > this.subtotal - this.fee + Number.EPSILON))
+                if ((this.total * (2-this.TOTAL_CHECK_ACCURACY) < this.subtotal - this.fee) ||
+                    (this.total * this.TOTAL_CHECK_ACCURACY > this.subtotal - this.fee))
                     throw Error('Total, subtotal and fee do not match.')
             }
 

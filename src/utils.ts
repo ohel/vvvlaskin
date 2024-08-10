@@ -28,7 +28,9 @@ const roundAndPrintTwoDecimals = (num: number, pad_length?: number): string => {
 }
 
 const roundTwoDecimals = (num: number): number => {
-    return +(Math.round(+(num + 'e+2')) + 'e-2')
+    const retval: number = +(Math.round(+(num + 'e+2')) + 'e-2')
+    if (num > 1 && isNaN(retval)) throw Error("Something wrong with rounding number: " + num)
+    return isNaN(retval) ? 0 : retval
 }
 
 export { printTwoDecimals, roundAndPrintTwoDecimals, roundTwoDecimals }
