@@ -12,7 +12,7 @@ import { LossTransaction } from './loss-transaction'
 import { TransferTransaction } from './transfer-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { RawTransaction } from './raw-transaction'
-import { roundAndPrintTwoDecimals, roundTwoDecimals, printTwoDecimals } from './utils'
+import { roundAndPrintTwoDecimals, roundTwoDecimals } from './utils'
 import Currencies from './currencies'
 
 export class TransactionManager {
@@ -76,19 +76,25 @@ export class TransactionManager {
         }
 
         const padWidth: number = Math.max('CURRENCY'.length, maxCurrencyLength);
-        const pad: string = '='.repeat(padWidth);
+        console.log(`In the balance column, * denotes a close to but not zero value. Consider zeroing it using a loss transaction.\n`)
 
-        console.log(`${pad}============================================\n`)
+        console.log(`${'='.repeat(padWidth + 44)}\n`)
         console.log(`${'CURRENCY'.padStart(padWidth)}       BUYS      SALES       GAIN    BALANCE\n`)
-        for (const t of balances) {
-            console.log(`${(Currencies[t.currency] || t.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(t.buys, 10)} ${roundAndPrintTwoDecimals(t.sales, 10)} ` +
-            `${roundAndPrintTwoDecimals(t.gain, 10)} ${roundAndPrintTwoDecimals(t.balance, 10)}`)
+        for (const b of balances.filter(f => f.balance < 1e6 * Number.EPSILON)) {
+            console.log(`${(Currencies[b.currency] || b.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(b.buys, 10)} ${roundAndPrintTwoDecimals(b.sales, 10)} ` +
+            `${roundAndPrintTwoDecimals(b.gain, 10)} ${'0'.padStart(10)}${Math.abs(b.balance) > 0 ? '*' : ''}`)
         }
-        const buys = balances.map(t => t.buys).reduce((x,y) => {return x+y})
-        const sales = balances.map(t => t.sales).reduce((x,y) => {return x+y})
-        const gain = balances.map(t => t.gain).reduce((x,y) => {return x+y})
+        console.log(`${'-'.repeat(padWidth + 44)}`)
+        for (const b of balances.filter(f => f.balance > 0)) {
+            const bal = b.balance.toFixed(10)
+            console.log(`${(Currencies[b.currency] || b.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(b.buys, 10)} ${roundAndPrintTwoDecimals(b.sales, 10)} ` +
+            `${roundAndPrintTwoDecimals(b.gain, 10)} ${''.padStart(10 - bal.indexOf('.'))}${bal}`)
+        }
+        const buys = balances.map(b => b.buys).reduce((x,y) => {return x+y})
+        const sales = balances.map(b => b.sales).reduce((x,y) => {return x+y})
+        const gain = balances.map(b => b.gain).reduce((x,y) => {return x+y})
         console.log(`\n${'All'.padStart(padWidth)} ${roundAndPrintTwoDecimals(buys, 10)} ${roundAndPrintTwoDecimals(sales, 10)} ${roundAndPrintTwoDecimals(gain, 10)}`)
-        console.log(`\n${pad}============================================`)
+        console.log(`\n${'='.repeat(padWidth + 44)}`)
     }
 
     printSellTransactions(year?: number, currency?: string) {
@@ -121,16 +127,18 @@ export class TransactionManager {
         }
         console.log(`Myytyjen valuuttojen hankintahinta yhteensä: ${roundAndPrintTwoDecimals(total_buy_cost)} €`)
         console.log(`Myyntien ja hankintahinnan erotus: ${roundAndPrintTwoDecimals(total_sold - total_buy_cost)} €`)
-        console.log(`Verotuksellinen ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${printTwoDecimals(gains)} €\n`)
+        console.log(`Verotuksellinen ${gains >= 0 ? 'tuotto' : 'tappio'} yhteensä: ${roundAndPrintTwoDecimals(gains)} €\n`)
     }
 
-    printLosses(year?: number) {
+    printLosses(year?: number, currency?: string) {
         let total_losses: number = 0.0
 
         let index: number = 0
         for (const t of this.transactions.filter(t => {
                 return t.trtype == TransactionType.Loss &&
-                (!year || t.timestamp.getFullYear() == year)
+                (!year || t.timestamp.getFullYear() == year) &&
+                (!currency || t.cur == currency) &&
+                t.total > 0
             })) {
             index++
             if (index === 1) {

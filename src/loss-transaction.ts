@@ -7,7 +7,7 @@
 import { TransactionType } from './transaction-type'
 import { BaseTransaction } from './base-transaction'
 
-// Use loss transaction to fix balances. Amount is handled so that balance cannot be negative, so a huge loss transaction amount can be used to zero balances.
+// Use loss transaction to fix balances. They do not affect tax return calculations. Since amounts are handled so that balances cannot be negative, a huge loss transaction amount can be used to zero balances. A negative balance can be zeroed with a zero amount loss transaction.
 // Take into consideration losses manually in your tax return if relevant.
 export class LossTransaction extends BaseTransaction {
     readonly trtype: TransactionType = TransactionType.Loss

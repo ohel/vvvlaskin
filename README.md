@@ -28,7 +28,7 @@ Transactions of the transfer type are at the moment just notes to yourself as th
 
 * JSONL file
 * One transaction per line
-* Mandatory properties: timestamp, trtype, cur, amount, total
+* Mandatory properties: timestamp, trtype, cur, amount, total (except for transfer and loss transactions)
   * timestamp: YYYY-MM-DD HH:MM:[SS]
   * trtype: `b[uy]|s[ell]|t[ransfer]|l[oss]`
   * cur = currency: string
@@ -46,7 +46,7 @@ Some calculation rules:
 * For sales: `<total> = <subtotal> - <fee>` and `<transaction final amount> = <amount> + <vcfee>` (make sure the numbers match what you lost)
 * Final price per unit used in calculations is: `<final ppu> = <total> / <transaction final amount>`
 * Transfer transactions are just for bookkeeping, they are not included in the calculations.
-* Loss transactions are used to just fix your balances correct (for example, a transfer fee in virtual currency if there isn't a sale transaction to mark the fee). Balance by loss cannot go negative, so use a big number to zero out your balance.
+* Loss transactions are used to just fix your balances correct. Balance by loss cannot go negative, so use a big number to zero out your balance if you no longer own the currency.
 
 An example line:
 `{ "timestamp": "2022-0x-yy xx:xx", "trtype": "buy", "cur": "XXX", "amount": 20.0, "ppu": 10.0, "fee": 2.99, "subtotal": 197.01, "total": 200, "exchange": "MegaXchange", "ref": "XYZ123", "comment": "Template", "ignore": true }`
@@ -56,8 +56,9 @@ See also the `example.jsonl` example file.
 ## How to run
 
 1. `npm install`
-2. `npm run example` to run an example
-3. `npm run examplebalances` to show example balances
+2. `npm run build` to build the app
+3. `npm run example` to run an example
+4. `npm run examplebalances` to show example balances
 
 To calculate the report for a specific input file, year and currency, use a command like: `npm run build && node src/app.js input.jsonl 2022 BTC`, where *input.jsonl* has the transactions, *2022* is an optional year, and *BTC* an optional crypto currency code. List of currencies is in `src/currencies.ts`.
 
@@ -68,8 +69,9 @@ Note: the gains in balances only matters if your balance is zero, i.e. everythin
 ## Kuinka ajaa (how to run in Finnish)
 
 1. `npm install`
-2. `npm run example` ajaaksesi esimerkin
-3. `npm run examplebalances` ajaaksesi esimerkin loppusummista
+2. `npm run build` valmistaaksesi ohjelmiston
+3. `npm run example` ajaaksesi esimerkin
+4. `npm run examplebalances` ajaaksesi esimerkin loppusummista
 
 Tulostaaksesi ilmoituksen tietylle tiedostolle, vuodelle ja valuutalle, käytä komentoa kuten edellä englanninkielisessä tekstissä; komennossa *input.jsonl* on tapahtumatiedosto, *2022* on valinnainen vuosi ja *BTC* on valinnainen valuuttakoodi. Lista valuutoista on tiedostossa `src/currencies.ts`.
 
@@ -151,12 +153,14 @@ A browser user interface, where one could see all the details from all the trans
 
 `$ npm run examplebalances`
 
+    In the balance column, * denotes a close to but not zero value. Consider zeroing it using a loss transaction.
+
     ====================================================
 
     CURRENCY       BUYS      SALES       GAIN    BALANCE
 
-     Bitcoin   21150.00   45960.00   24810.00       0.50
-       Ether    4050.00     930.00   -3120.00       4.50
+     Bitcoin   21150.00   45960.00   24810.00          0.5000000000
+       Ether    4050.00     930.00   -3120.00          4.5000000000
 
          All   25200.00   46890.00   21690.00
 

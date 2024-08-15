@@ -4,7 +4,7 @@
     GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
-const printTwoDecimals = (num: number): string => {
+const printAtLeastTwoDecimals = (num: number): string => {
     let retval: string = num.toString()
     if (retval.indexOf('.') < 0) {
         retval = retval + '.00'
@@ -33,4 +33,4 @@ const roundTwoDecimals = (num: number): number => {
     return isNaN(retval) ? 0 : retval
 }
 
-export { printTwoDecimals, roundAndPrintTwoDecimals, roundTwoDecimals }
+export { printAtLeastTwoDecimals, roundAndPrintTwoDecimals, roundTwoDecimals }

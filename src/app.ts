@@ -20,13 +20,11 @@ const t_manager = new TransactionManager(raw_data)
 let year: number = undefined;
 let currency: string = undefined;
 let balances: boolean = false;
-if (args && args.length > 1) {
+if (args.length > 1) {
     balances = (args[1] == 'balances')
     if (!balances) year = parseInt(args[1])
 }
-if (args && args.length > 2) {
-    currency = args[2]
-}
+if (args.length > 2) currency = args[2]
 
 if (balances) {
     t_manager.printBalances(currency)

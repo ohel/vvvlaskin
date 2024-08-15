@@ -6,7 +6,7 @@
 
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { TransactionType } from './transaction-type'
-import { printTwoDecimals } from './utils'
+import { printAtLeastTwoDecimals } from './utils'
 import Currencies from './currencies'
 
 export abstract class BaseTransaction implements BasicTransactionInfo {
@@ -53,7 +53,7 @@ export abstract class BaseTransaction implements BasicTransactionInfo {
         console.log(
 `${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} ${Currencies[this.cur] || this.cur}
     Määrä: ${this.amount} ${this.cur}
-    Arvo: ${printTwoDecimals(this.total)} €
+    Arvo: ${printAtLeastTwoDecimals(this.total)} €
 `)
     }
 }

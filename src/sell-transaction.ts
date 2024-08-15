@@ -8,7 +8,7 @@ import { TransactionType } from './transaction-type'
 import { BaseTransaction } from './base-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { BuyCostBasis } from './buy-cost-basis'
-import { roundAndPrintTwoDecimals, printTwoDecimals, roundTwoDecimals } from './utils'
+import { roundAndPrintTwoDecimals, printAtLeastTwoDecimals, roundTwoDecimals } from './utils'
 import { HMOType } from './hmo-type'
 import Currencies from './currencies'
 
@@ -89,7 +89,7 @@ export class SellTransaction extends BaseTransaction {
 `Myynti [${Currencies[this.cur] || this.cur}] ${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${this.exchange || '-'}, viite: ${this.ref || '-'})
 
     Määrä: ${this.amount} ${this.cur}${this.vcfee > 0 ? ` (+ myyntikulu ${this.vcfee} ${this.cur})` : ''}
-    Myyntihinta: ${printTwoDecimals(this.total)} € (${this.end_ppu} €/${this.cur})
+    Myyntihinta: ${printAtLeastTwoDecimals(this.total)} € (${this.end_ppu} €/${this.cur})
 
     Hankinnat, joita myytiin:`)
 
@@ -98,10 +98,10 @@ export class SellTransaction extends BaseTransaction {
             console.log(`    ${+i+1}. ${buy.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${buy.exchange || '-'}, viite: ${buy.ref || '-'})`)
             console.log(`       Määrä: ${this.buy_cost_basis[i].amount} ${buy.cur}`)
             console.log(`       Hankintakustannus: ${roundAndPrintTwoDecimals(buy.end_ppu * this.buy_cost_basis[i].amount)} € (${buy.end_ppu} €/${buy.cur})`)
-            console.log(`       ${this.buy_cost_basis[i].tax_gain >= 0 ? 'Tuotto' : 'Tappio'}: ${printTwoDecimals(this.buy_cost_basis[i].tax_gain)} €${this.buy_cost_basis[i].hmo_type.toString()}`)
+            console.log(`       ${this.buy_cost_basis[i].tax_gain >= 0 ? 'Tuotto' : 'Tappio'}: ${printAtLeastTwoDecimals(this.buy_cost_basis[i].tax_gain)} €${this.buy_cost_basis[i].hmo_type.toString()}`)
         }
         console.log()
-        console.log(`    ${this.tax_sell_gain >= 0 ? 'Tuotto' : 'Tappio'} yhteensä: ${printTwoDecimals(this.tax_sell_gain)} €`)
+        console.log(`    ${this.tax_sell_gain >= 0 ? 'Tuotto' : 'Tappio'} yhteensä: ${printAtLeastTwoDecimals(this.tax_sell_gain)} €`)
         console.log('--------------------------------------------------------------------')
     }
 

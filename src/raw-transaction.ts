@@ -48,9 +48,16 @@ export class RawTransaction implements BasicTransactionInfo {
             this.trtype = TransactionType[trtype_string]
 
             this.timestamp = new Date(json.timestamp)
-            this.cur = json.cur // Mandatory.
-            this.amount = json.amount // Mandatory.
-            this.total = json.total // Mandatory.
+            if (!json.cur) throw Error('Transaction is missing currency.')
+            if (!json.amount) throw Error('Transaction is missing amount.')
+            if (!json.total) {
+                if (this.trtype == TransactionType.Buy ||
+                    this.trtype == TransactionType.Sell)
+                    throw Error('Transaction is missing total.')
+            }
+            this.cur = json.cur
+            this.amount = json.amount
+            this.total = json.total || 0
             this.subtotal = json.subtotal // Optional.
             this.ppu = json.ppu || 0
             this.fee = json.fee || 0
