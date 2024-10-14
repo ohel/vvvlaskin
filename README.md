@@ -153,14 +153,15 @@ A browser user interface, where one could see all the details from all the trans
 
 `$ npm run examplebalances`
 
-    In the balance column, * denotes a close to but not zero value. Consider zeroing it using a loss transaction.
+    In the balance column, * denotes a close to but not zero value. Consider zeroing it using a loss transaction. The break-even price is for the remaining balance.
 
     ====================================================
 
     CURRENCY       BUYS      SALES       GAIN    BALANCE
 
-     Bitcoin   21150.00   45960.00   24810.00          0.5000000000
-       Ether    4050.00     930.00   -3120.00          4.5000000000
+    --------------------------------------------------------------- B/E
+     Bitcoin   21150.00   45960.00   24810.00          0.5000000000 13000
+       Ether    4050.00     930.00   -3120.00          4.5000000000 677.78
 
          All   25200.00   46890.00   21690.00
 
