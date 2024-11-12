@@ -37,9 +37,6 @@ export class SellTransaction extends BaseTransaction {
         this.total_buy_cost = 0.0
         this.tax_sell_gain = 0.0
 
-        // Not taking into account leap years.
-        const milliseconds_in_ten_years = 10*365*24*60*60*1000
-
         for (let bt of previousBuyTransactions) {
             if (bt.unhandled_amount < Number.EPSILON) continue
             let amount: number = 0.0
@@ -56,7 +53,7 @@ export class SellTransaction extends BaseTransaction {
             }
             const cost: number = roundTwoDecimals(amount * bt.end_ppu)
             const partial_sell_total: number = roundTwoDecimals(amount * this.end_ppu)
-            const hmo_factor: number = (this.timestamp.getTime() - bt.timestamp.getTime() > milliseconds_in_ten_years) ? 0.4 : 0.2
+            const hmo_factor: number = this.checkIfTenYearsHavePassed(this.timestamp, bt.timestamp) ? 0.4 : 0.2
 
             let tax_gain: number = partial_sell_total - cost
             let hmo_type: HMOType = HMOType.None
@@ -84,11 +81,24 @@ export class SellTransaction extends BaseTransaction {
         }
     }
 
+    // This takes leap years into account by comparing dates by their numbers directly.
+    private checkIfTenYearsHavePassed(newer: Date, older: Date): boolean {
+        const year_diff = newer.getFullYear() - older.getFullYear()
+        if (year_diff < 10) return false
+        if (year_diff > 10) return true
+
+        const month_diff = newer.getMonth() - older.getMonth()
+        if (month_diff < 0) return false
+        if (month_diff > 0) return true
+
+        return newer.getDate() >= older.getDate()
+    }
+
     printTaxReturn(): void {
         console.log(
 `Myynti [${Currencies[this.cur] || this.cur}] ${this.timestamp.toISOString().slice(0, 19).replace('T', ' ')} (pörssi: ${this.exchange || '-'}, viite: ${this.ref || '-'})
 
-    Määrä: ${this.amount} ${this.cur}${this.vcfee > 0 ? ` (+ myyntikulu ${this.vcfee} ${this.cur})` : ''}
+    Määrä: ${this.amount + this.vcfee} ${this.cur}${this.vcfee > 0 ? ` (josta myyntikuluja ${this.vcfee} ${this.cur})` : ''}
     Myyntihinta: ${printAtLeastTwoDecimals(this.total)} € (${this.end_ppu} €/${this.cur})
 
     Hankinnat, joita myytiin:`)
