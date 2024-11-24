@@ -14,9 +14,11 @@ import { BasicTransactionInfo } from './basic-transaction-info'
 import { RawTransaction } from './raw-transaction'
 import { roundAndPrintTwoDecimals, roundTwoDecimals } from './utils'
 import Currencies from './currencies'
+import * as fs from 'fs'
 
 export class TransactionManager {
     readonly transactions: BaseTransaction[] = []
+    readonly exiled_currencies: string[] = []
 
     constructor(transactions_file_contents: string) {
         const jsonl: string[] = transactions_file_contents.split(/\r?\n/)
@@ -30,6 +32,14 @@ export class TransactionManager {
             last_timestamp = raw_t.timestamp;
             if (!raw_t.ignore) this.addTransaction(raw_t)
         }
+
+        // Completely optional so if not found, that's fine.
+        // Currencies listed in the file will be categorized separately in balances printout.
+        try {
+            fs.readFileSync('exile.txt').toString().split('\n').forEach(line => {
+                this.exiled_currencies.push(line)
+            })
+        } catch { }
     }
 
     addTransaction(t: BasicTransactionInfo) {
@@ -87,16 +97,28 @@ export class TransactionManager {
 
         console.log(`${'='.repeat(padWidth + 44)}\n`)
         console.log(`${'CURRENCY'.padStart(padWidth)}       BUYS      SALES       GAIN    BALANCE\n`)
-        for (const b of balances.filter(f => f.balance < 1e6 * Number.EPSILON)) {
+
+        for (const b of balances.filter(f => f.balance < 1e6 * Number.EPSILON && !this.exiled_currencies.includes(f.currency))) {
             console.log(`${(Currencies[b.currency] || b.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(b.buys, 10)} ${roundAndPrintTwoDecimals(b.sales, 10)} ` +
             `${roundAndPrintTwoDecimals(b.gain, 10)} ${'0'.padStart(10)}${Math.abs(b.balance) > 0 ? '*' : ''}`)
         }
+
+        if (this.exiled_currencies.length > 0) {
+            console.log(`${'-'.repeat(padWidth + 55)}`)
+            for (const b of balances.filter(f => this.exiled_currencies.includes(f.currency))) {
+                const bal = b.balance.toFixed(10)
+                console.log(`${(Currencies[b.currency] || b.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(b.buys, 10)} ${roundAndPrintTwoDecimals(b.sales, 10)} ` +
+                `${roundAndPrintTwoDecimals(b.gain, 10)} ${''.padStart(10 - bal.indexOf('.'))}${bal}`)
+            }
+        }
         console.log(`${'-'.repeat(padWidth + 55)} B/E`)
-        for (const b of balances.filter(f => f.balance > 0)) {
+
+        for (const b of balances.filter(f => f.balance > 0 && !this.exiled_currencies.includes(f.currency))) {
             const bal = b.balance.toFixed(10)
             console.log(`${(Currencies[b.currency] || b.currency).padStart(padWidth)} ${roundAndPrintTwoDecimals(b.buys, 10)} ${roundAndPrintTwoDecimals(b.sales, 10)} ` +
             `${roundAndPrintTwoDecimals(b.gain, 10)} ${''.padStart(10 - bal.indexOf('.'))}${bal} ${b.be.toString().substring(0, 8)}`)
         }
+
         const buys = balances.map(b => b.buys).reduce((x,y) => {return x+y})
         const sales = balances.map(b => b.sales).reduce((x,y) => {return x+y})
         const gain = balances.map(b => b.gain).reduce((x,y) => {return x+y})

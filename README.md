@@ -151,6 +151,8 @@ A browser user interface, where one could see all the details from all the trans
 
 ## Example balances output
 
+The balances output will first list currencies you don't have anymore. After that will be a list of "exiled" currencies: if you own some, but don't really wish to think like you own that currency anymore, you may use the file `exile.txt` to list currency codes, one per line, to show them in this exiled section. Finally there there will be a printout of the section of currencies you own, along with their break-even price. The final totals line will include all currencies you currently own, exiled included.
+
 `$ npm run examplebalances`
 
     In the balance column, * denotes a close to but not zero value. Consider zeroing it using a loss transaction. The break-even price is for the remaining balance.
