@@ -50,7 +50,7 @@ export class RawTransaction implements BasicTransactionInfo {
             this.timestamp = new Date(json.timestamp)
             if (!json.cur) throw Error('Transaction is missing currency.')
             if (!json.amount) throw Error('Transaction is missing amount.')
-            if (!json.total) {
+            if (!json.total && json.total !== 0) {
                 if (this.trtype == TransactionType.Buy ||
                     this.trtype == TransactionType.Sell)
                     throw Error('Transaction is missing total.')
