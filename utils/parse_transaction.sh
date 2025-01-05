@@ -72,11 +72,13 @@ then
         t_raw_ts_year=$(echo $t_raw_ts | cut -f 3 -d '.' | cut -f 1 -d ' ')
     fi
     t_timestamp=$(date -d "$t_raw_ts_year-$t_raw_ts_month-$t_raw_ts_day $(echo $t_raw_ts | cut -f 2- -d ' ')" +"%Y-%m-%d %H:%M")
+    echo "Double check the timestamp as conversion might be off by 12 hours."
 
     t_ref=$(grep -Po "(?<=Reference code[ \t]).*" "$t_file")
     t_amount=$(grep -Po "(?<=Amount[ \t])[0-9.,]*" "$t_file" | tr -d ',')
     t_fee=$(grep -Po "(?<=Coinbase fee[ \t]€).*" "$t_file")
     [ "$(grep -Po "Coinbase One[ \t]-" "$t_file")" ] && t_fee=0
+    [ "$(grep -Po "Coinbase One[ \t]-" "$t_file")" ] && echo "Double check the fee as you're using Coinbase One."
 
     [ "$(grep "You can trade" "$t_file")" ] && t_trtype=buy
     [ "$(grep "You've sold" "$t_file")" ] && t_trtype=sell
