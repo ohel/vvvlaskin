@@ -4,9 +4,9 @@
 
 transactions_file=transactions.jsonl
 
-echo -n "Enter pair [USDT/EUR]: "
+echo -n "Enter pair [USDC/EUR]: "
 read pair
-[ ! "$pair" ] && pair="USDT/EUR"
+[ ! "$pair" ] && pair="USDC/EUR"
 
 cur1=$(echo $pair | cut -f 1 -d '/')
 cur2=$(echo $pair | cut -f 2 -d '/')
@@ -59,17 +59,18 @@ then
     read cb_fee
     [ ! "$cb_fee" ] && cb_fee=0
 
-    if [ $cur_sold = "USDT" ] || [ $cur_bought = "USDT" ]
+    [ $cur_sold = "USDC" ] || [ $cur_bought = "USDC" ] && url_currency=usdc
+    [ $cur_sold = "ETH" ] || [ $cur_bought = "ETH" ] && url_currency=ethereum
+    if [ "$url_currency" ]
     then
         unixtime_start=$(date -d "$timestamp" +"%s")
         unixtime_end=$(expr $unixtime_start + 3600)
-        echo "Check price URL: https://www.coingecko.com/price_charts/tether/eur/custom.json?from=$unixtime_start&to=$unixtime_end"
-        echo -n "Enter USDT price (or timestamp,price pair): "
-        read usdt_price
-        [ "$(echo $usdt_price | grep -o ,)" ] && usdt_price=$(echo $usdt_price | cut -f 2 -d ',')
-
-        [ $cur_sold = "USDT" ] && cs_price=$usdt_price
-        [ $cur_bought = "USDT" ] && cb_price=$usdt_price
+        echo "Check price URL: https://www.coingecko.com/price_charts/$url_currency/eur/custom.json?from=$unixtime_start&to=$unixtime_end"
+        echo -n "Enter $url_currency price (or timestamp,price pair): "
+        read url_cur_price
+        [ "$(echo $url_cur_price | grep -o ,)" ] && url_cur_price=$(echo $url_cur_price | cut -f 2 -d ',')
+        [ $cur_sold = "USDC" ] || [ $cur_sold = "ETH" ] && cs_price=$url_cur_price
+        [ $cur_bought = "USDC" ] || [ $cur_bought = "ETH" ] && cb_price=$url_cur_price
     else
         echo -n "Enter price of 1 $cur_sold in EUR: "
         read cs_price
