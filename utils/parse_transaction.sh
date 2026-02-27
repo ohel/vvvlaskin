@@ -54,12 +54,12 @@ output() {
     fi
 }
 
-if [ "$(grep Coinbase "$t_file")" ]
+if grep -q Coinbase "$t_file"
 then
     t_exchange=Coinbase
 
     t_raw_ts=$(grep -Po "(?<=Date and time[ \t]).*" "$t_file")
-    if [ "$(echo $t_raw_ts | grep "/")" ]
+    if echo $t_raw_ts | grep -q "/"
     then
         # If year first, then format is YYYY/MM/DD.
         t_raw_ts_year=$(echo $t_raw_ts | cut -f 1 -d '/')
@@ -77,14 +77,15 @@ then
     t_ref=$(grep -Po "(?<=Reference code[ \t]).*" "$t_file")
     t_amount=$(grep -Po "(?<=Amount[ \t])[0-9.,]*" "$t_file" | tr -d ',')
     t_fee=$(grep -Po "(?<=Coinbase fee[ \t]€).*" "$t_file")
-    [ "$(grep -Po "Coinbase One[ \t]-" "$t_file")" ] && t_fee=0
-    [ "$(grep -Po "Coinbase One[ \t]-" "$t_file")" ] && echo "Double check the fee as you're using Coinbase One."
+    grep -qPo "Coinbase One[ \t]-" "$t_file" && t_fee=0
+    grep -qPo "Coinbase One[ \t]-" "$t_file" && echo "Double check the fee as you're using Coinbase One."
 
-    [ "$(grep "You can trade" "$t_file")" ] && t_trtype=buy
-    [ "$(grep "You've sold" "$t_file")" ] && t_trtype=sell
+    grep -q "You can trade" "$t_file" && t_trtype=buy
+    grep -q "You bought" "$t_file" && t_trtype=buy
+    grep -q "You've sold" "$t_file" && t_trtype=sell
 
     # Handle conversion as sell+buy transaction pair.
-    if [ "$(grep "You converted" "$t_file")" ]
+    if grep -q "You converted" "$t_file"
     then
         t_subtotal=$(grep -Po "(?<=You converted[ \t]€)[0-9.]*" "$t_file" | tr -d ',')
         t_total=$(echo "$t_subtotal - $t_fee" | bc)
