@@ -78,8 +78,7 @@ then
 
     if [ "$cs_price" ]
     then
-        total=$(echo "scale=10; $s_amount * $cs_price" | bc)
-        [ $(echo $total | cut -c 1) = "." ] && total=0$total
+        total=$(awk -v amount="$s_amount" -v price="$cs_price" 'BEGIN { printf "%.10f", (amount * price) }')
     else
         if [ ! "$cb_price" ]
         then
@@ -87,14 +86,11 @@ then
             read cb_price
             [ ! "$cb_price" ] && echo "Error." && exit 1
         fi
-        total=$(echo "scale=10; $b_amount * $cb_price" | bc)
-        [ $(echo $total | cut -c 1) = "." ] && total=0$total
+        total=$(awk -v amount="$b_amount" -v price="$cb_price" 'BEGIN { printf "%.10f", (amount * price) }')
     fi
 
-    [ "$cs_price" ] && cb_price=$(echo "scale=10; $total / $b_amount" | bc)
-    [ ! "$cs_price" ] && cs_price=$(echo "scale=10; $total / $s_amount" | bc)
-    [ $(echo $cs_price | cut -c 1) = "." ] && cs_price=0$cs_price
-    [ $(echo $cb_price | cut -c 1) = "." ] && cb_price=0$cb_price
+    [ "$cs_price" ] && cb_price=$(awk -v total="$total" -v amount="$b_amount" 'BEGIN { printf "%.10f", (total / amount) }')
+    [ ! "$cs_price" ] && cs_price=$(awk -v total="$total" -v amount="$s_amount" 'BEGIN { printf "%.10f", (total / amount) }')
 
     tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"sell\", \"cur\": \"$cur_sold\", \"amount\": $s_amount, \"ppu\": $cs_price, \"total\": $total, \"exchange\": \"Binance\", \"ref\": \"$t_ref\", \"comment\": \"Converted $cur_sold to $cur_bought.\" }"
     echo $tr

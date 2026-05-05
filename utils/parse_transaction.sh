@@ -77,10 +77,16 @@ then
     t_ref=$(grep -Po "(?<=Reference code[ \t]).*" "$t_file")
     t_amount=$(grep -Po "(?<=Amount[ \t])[0-9.,]*" "$t_file" | tr -d ',')
     t_fee=$(grep -Po "(?<=Coinbase fee[ \t]€).*" "$t_file")
-    grep -qPo "Coinbase One[ \t]-" "$t_file" && t_fee=0
-    grep -qPo "Coinbase One[ \t]-" "$t_file" && echo "Double check the fee as you're using Coinbase One."
+    t_coinbase_one=$(grep -Po "(?<=Coinbase One[ \t]-€).*" "$t_file")
+    if [ "$t_coinbase_one" ];
+    then
+        echo "Original fee: $t_fee €"
+        t_fee=$(awk -v fee="$t_fee" -v saved="$t_coinbase_one" 'BEGIN { printf "%.2f", (fee - saved) }')
+        echo "Fee with Coinbase One: $t_fee € (saved $t_coinbase_one €)"
+    fi
 
     grep -q "You can trade" "$t_file" && t_trtype=buy
+    grep -q "You can access" "$t_file" && t_trtype=buy
     grep -q "You bought" "$t_file" && t_trtype=buy
     grep -q "You've sold" "$t_file" && t_trtype=sell
 
@@ -88,7 +94,7 @@ then
     if grep -q "You converted" "$t_file"
     then
         t_subtotal=$(grep -Po "(?<=You converted[ \t]€)[0-9.]*" "$t_file" | tr -d ',')
-        t_total=$(echo "$t_subtotal - $t_fee" | bc)
+        t_total=$(awk -v sub="$t_subtotal" -v fee="$t_fee" 'BEGIN { printf "%.2f", (sub - fee) }')
         t_amount_bought=$t_amount
         t_amount_sold=$(grep -Po "(?<=Total[ \t])[0-9.,]*" "$t_file" | tr -d ',')
 
@@ -97,8 +103,8 @@ then
         t_cur=$(grep -Po "(?<=Total[ \t])[0-9.,].*" "$t_file" | cut -f 2 -d ' ')
         t_cur_bought=$(grep -o "Your .* is now available" "$t_file" | cut -f 2 -d ' ')
         t_comment="Converted $t_cur to $t_cur_bought."
-        t_ppu=$(echo "scale=10; $t_subtotal / $t_amount_sold" | bc)
-        [ "$(echo "$t_ppu" | cut -c 1)" = "." ] && t_ppu="0$t_ppu"
+        t_ppu=$(awk -v sub="$t_subtotal" -v sold="$t_amount_sold" 'BEGIN { printf "%.10f", (sub / sold) }')
+
         output
 
         t_trtype=buy
@@ -106,8 +112,8 @@ then
         t_cur=$t_cur_bought
         t_fee=0
         t_subtotal=$t_total
-        t_ppu=$(echo "scale=10; $t_total / $t_amount_bought" | bc)
-        [ "$(echo "$t_ppu" | cut -c 1)" = "." ] && t_ppu="0$t_ppu"
+        t_ppu=$(awk -v total="$t_total" -v amount="$t_amount_bought" 'BEGIN { printf "%.10f", (total / amount) }')
+
         output
     else
         t_cur=$(grep "Amount" "$t_file" | grep -o "[0-9].*" | cut -f 2 -d ' ')
@@ -132,7 +138,7 @@ then
     t_amount=$(grep "Final Amount" "$t_file" | cut -f 2 -d ':' | tr -dc '.0-9')
     t_fee=$(grep -Po "(?<=^Fee:).*" "$t_file" | tr -dc '.0-9')
     t_total=$(grep -Po "(?<=^Amount:).*" "$t_file" | tr -dc '.0-9')
-    t_subtotal=$(echo "$t_total - $t_fee" | bc)
+    t_subtotal=$(awk -v total="$t_total" -v fee="$t_fee" 'BEGIN { printf "%.2f", (total - fee) }')
 
     output
 fi

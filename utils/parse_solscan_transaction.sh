@@ -58,14 +58,12 @@ comment="Realize value for $currency_sold->$currency_bought swap. Value based on
 
 if [ "$currency_sold" = "$main_currency" ]
 then
-    total=$(echo "scale=10; $s_amount * $main_currency_price" | bc)
-    [ $(echo $total | cut -c 1) = "." ] && total=0$total
+    total=$(awk -v amount="$s_amount" -v price="$main_currency_price" 'BEGIN { printf "%.10f", (amount * price) }')
     sale_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"sell\", \"cur\": \"$main_currency\", \"amount\": $s_amount, \"ppu\": $main_currency_price, $vc_text\"total\": $total, \"exchange\": \"$exchange\", \"ref\": \"$signature\", \"comment\": \"$comment\" }"
     buy_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"buy\", \"cur\": \"$currency_bought\", \"amount\": $b_amount, \"total\": $total, \"exchange\": \"$exchange\", \"ref\": \"$signature\" }"
 elif [ "$currency_bought" = "$main_currency" ]
 then
-    total=$(echo "scale=10; $b_amount * $main_currency_price" | bc)
-    [ $(echo $total | cut -c 1) = "." ] && total=0$total
+    total=$(awk -v amount="$b_amount" -v price="$main_currency_price" 'BEGIN { printf "%.10f", (amount * price) }')
     sale_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"sell\", \"cur\": \"$currency_sold\", \"amount\": $s_amount, \"total\": $total, \"exchange\": \"$exchange\", \"ref\": \"$signature\", \"comment\": \"$comment\" }"
     buy_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"buy\", \"cur\": \"$main_currency\", \"amount\": $b_amount, \"ppu\": $main_currency_price, $vc_text\"total\": $total, \"exchange\": \"$exchange\", \"ref\": \"$signature\" }"
 fi
@@ -77,12 +75,9 @@ then
     read main_currency_value
     echo -n "Enter amount of $main_currency fee (from $main_currency balance change): "
     read main_currency_fee
-    total=$(echo "scale=10; $main_currency_value * $main_currency_price" | bc)
-    [ $(echo $total | cut -c 1) = "." ] && total=0$total
-    fee=$(echo "scale=10; $main_currency_fee * $main_currency_price" | bc)
-    [ $(echo $fee | cut -c 1) = "." ] && fee=0$fee
-    total_with_fee=$(echo $total + $fee | bc)
-    [ $(echo $total_with_fee | cut -c 1) = "." ] && total_with_fee=0$total_with_fee
+    total=$(awk -v value="$main_currency_value" -v price="$main_currency_price" 'BEGIN { printf "%.10f", (value * price) }')
+    fee=$(awk -v fee="$main_currency_fee" -v price="$main_currency_price" 'BEGIN { printf "%.10f", (fee * price) }')
+    total_with_fee=$(awk -v total="$total" -v fee="$fee" 'BEGIN { printf "%.10f", (total + fee) }')
     sale_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"sell\", \"cur\": \"$currency_sold\", \"amount\": $s_amount, \"total\": $total, \"exchange\": \"$exchange\", \"ref\": \"$signature\", \"comment\": \"$comment\" }"
     fee_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"sell\", \"cur\": \"$main_currency\", \"amount\": $main_currency_fee, \"ppu\": $main_currency_price, \"total\": $fee, \"exchange\": \"$exchange\", \"ref\": \"$signature\", \"comment\": \"Realize $main_currency fee for the swap.\" }"
     buy_tr="{ \"timestamp\": \"$timestamp\", \"trtype\": \"buy\", \"cur\": \"$currency_bought\", \"amount\": $b_amount, \"fee\": $fee, \"subtotal\": $total, \"total\": $total_with_fee, \"exchange\": \"$exchange\", \"ref\": \"$signature\" }"
