@@ -1,7 +1,7 @@
 // Virtuaalivaluuttaverotuslaskin (vvvlaskin)
 
 /*
-    Copyright 2022, 2024 Olli Helin
+    Copyright 2022, 2024, 2026 Olli Helin
     This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
     GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
@@ -17,8 +17,8 @@ if (!args || args.length < 1) {
 const raw_data = readFileSync(args[0], { encoding: 'utf8' })
 const t_manager = new TransactionManager(raw_data)
 
-let year: number = undefined;
-let currency: string = undefined;
+let year: number | undefined = undefined;
+let currency: string | undefined = undefined;
 let balances: boolean = false;
 if (args.length > 1) {
     balances = (args[1] == 'balances')

@@ -1,5 +1,5 @@
 /*
-    Copyright 2022, 2024 Olli Helin
+    Copyright 2022, 2024, 2026 Olli Helin
     This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
     GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
@@ -10,7 +10,7 @@ import { BasicTransactionInfo } from './basic-transaction-info'
 import { BuyCostBasis } from './buy-cost-basis'
 import { roundAndPrintTwoDecimals, printAtLeastTwoDecimals, roundTwoDecimals } from './utils'
 import { HMOType } from './hmo-type'
-import Currencies from './currencies'
+import { Currencies } from './currencies'
 
 export class SellTransaction extends BaseTransaction {
     readonly trtype: TransactionType = TransactionType.Sell

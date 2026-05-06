@@ -1,5 +1,5 @@
 /*
-    Copyright 2022, 2024 Olli Helin
+    Copyright 2022, 2024, 2026 Olli Helin
     This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
     GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
@@ -29,23 +29,33 @@ export class RawTransaction implements BasicTransactionInfo {
 
     constructor(jsonl: string) {
         try {
+            this.trtype = TransactionType.Other
+
             this.ignore = !jsonl
-            if (this.ignore) {
-                return
+
+            let json: any
+            if (!this.ignore) {
+                json = JSON.parse(jsonl)
+                this.ignore = !!json.ignore
             }
-            const json = JSON.parse(jsonl)
-            this.ignore = !!json.ignore
+
             if (this.ignore) {
+                this.timestamp = new Date()
+                this.cur = ""
+                this.amount = 0
+                this.total = 0
+                this.ppu = 0
+                this.fee = 0
+                this.subtotal = 0
+                this.vcfee = 0
                 return
             }
 
-            let trtype_string: string
-            if (json.trtype.match(/^[Bb][Uu]?[Yy]?/)) trtype_string = 'Buy'
-            if (json.trtype.match(/^[Ss][Ee]?[Ll]?[Ll]?/)) trtype_string = 'Sell'
-            if (json.trtype.match(/^[Ll][Oo]?[Ss]?[Ss]?/)) trtype_string = 'Loss'
-            if (json.trtype.match(/^[Tt][Rr]?[Aa]?[Nn]?[Ss]?[Ff]?[Ee]?[Rr]?/)) trtype_string = 'Transfer'
-            if (!trtype_string) throw Error('Unknown transaction type.')
-            this.trtype = TransactionType[trtype_string]
+            if (json.trtype.match(/^[Bb][Uu]?[Yy]?/)) this.trtype = TransactionType.Buy
+            if (json.trtype.match(/^[Ss][Ee]?[Ll]?[Ll]?/)) this.trtype = TransactionType.Sell
+            if (json.trtype.match(/^[Ll][Oo]?[Ss]?[Ss]?/)) this.trtype = TransactionType.Loss
+            if (json.trtype.match(/^[Tt][Rr]?[Aa]?[Nn]?[Ss]?[Ff]?[Ee]?[Rr]?/)) this.trtype = TransactionType.Transfer
+            if (this.trtype === TransactionType.Other) throw Error('Unknown transaction type.')
 
             this.timestamp = new Date(json.timestamp)
             if (!json.cur) throw Error('Transaction is missing currency.')

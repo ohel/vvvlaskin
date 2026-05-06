@@ -1,10 +1,10 @@
 /*
-    Copyright 2022, 2024 Olli Helin
+    Copyright 2022, 2024, 2026 Olli Helin
     This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
     GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
 
-export default {
+export const Currencies: Record<string, string> = {
     '00'        : '00 Token',
     'AAVE'      : 'Aave',
     'ADA'       : 'Cardano',

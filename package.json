@@ -1,7 +1,7 @@
 {
     "name": "vvvlaskin",
     "scripts": {
-        "build": "npx tsc src/app.ts",
+        "build": "npx tsc",
         "example": "node src/app.js example.jsonl",
         "examplebalances": "node src/app.js example.jsonl balances",
         "transactions": "node src/app.js transactions.jsonl",
@@ -9,6 +9,6 @@
     },
     "devDependencies": {
         "@types/node": "^25.0.3",
-        "typescript": "^5.5.4"
+        "typescript": "^6.0.3"
     }
 }

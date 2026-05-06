@@ -1,5 +1,5 @@
 /*
-    Copyright 2022, 2024 Olli Helin
+    Copyright 2022, 2024, 2026 Olli Helin
     This file is part of Virtuaalivaluuttaverotuslaskin, a free software released under the terms of the
     GNU General Public License v3: http://www.gnu.org/licenses/gpl-3.0.en.html
 */
@@ -13,7 +13,7 @@ import { TransferTransaction } from './transfer-transaction'
 import { BasicTransactionInfo } from './basic-transaction-info'
 import { RawTransaction } from './raw-transaction'
 import { roundAndPrintTwoDecimals, roundTwoDecimals } from './utils'
-import Currencies from './currencies'
+import { Currencies } from './currencies'
 import * as fs from 'fs'
 
 export class TransactionManager {
@@ -22,15 +22,17 @@ export class TransactionManager {
 
     constructor(transactions_file_contents: string) {
         const jsonl: string[] = transactions_file_contents.split(/\r?\n/)
-        let last_timestamp = null;
+        let last_timestamp = new Date(0)
 
-        for (let line of jsonl) {
-            let raw_t = new RawTransaction(line)
-            if (last_timestamp && last_timestamp > raw_t.timestamp) {
+        for (const line of jsonl) {
+            const raw_t = new RawTransaction(line)
+            if (raw_t.ignore) continue
+
+            if (last_timestamp > raw_t.timestamp) {
                 throw new Error(`Transactions file not in time order. Reference: ${raw_t.ref}`);
             }
             last_timestamp = raw_t.timestamp;
-            if (!raw_t.ignore) this.addTransaction(raw_t)
+            this.addTransaction(raw_t)
         }
 
         // Completely optional so if not found, that's fine.
